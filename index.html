@@ -845,7 +845,7 @@ position: absolute;
   
   <!-- 送信ボタン -->
   <div class="submit-container">
-<button type="button" class="submit-button" id="submitButton">送信する</button>
+<button type="button" class="submit-button">送信する</button>
   </div>
 </form>
 
@@ -882,45 +882,55 @@ position: absolute;
 document.addEventListener('DOMContentLoaded', function() {
   console.log('フォーム初期化開始');
   
+  // CONFIGをここで参照（初期化後）
+  try {
+    var storeReviewUrls = typeof CONFIG !== 'undefined' ? CONFIG.STORE_REVIEW_URLS : {};
+    console.log('CONFIG読み込み成功');
+  } catch (e) {
+    console.error('CONFIG読み込みエラー:', e);
+    var storeReviewUrls = {}; // フォールバック
+  }
+  
   // グローバル変数
-  let selectedStore = '';
-  const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
-
+  var selectedStore = '';
+  
   // 初期化
   initNavigation();
   initStarRating();
   initFormNavigation();
 
-  // 送信ボタンにイベントリスナーを追加（タッチデバイス対応）
-  const submitButton = document.getElementById('submitButton');
+  // 送信ボタンのイベント処理
+  var submitButton = document.querySelector('.submit-button');
   if (submitButton) {
-    // クリックとタッチの両方をサポート
+    console.log('送信ボタン検出');
     submitButton.addEventListener('click', validateAndSubmit);
     submitButton.addEventListener('touchend', function(e) {
-      e.preventDefault(); // デフォルトのタッチ動作を防止
+      e.preventDefault();
       validateAndSubmit(e);
     });
+  } else {
+    console.error('送信ボタンが見つかりません');
   }
 
-  // バリデーションと送信処理を統合した関数
+  // バリデーションと送信処理
   function validateAndSubmit(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     console.log('送信処理開始');
     
-    const form = document.getElementById('surveyForm');
-    const formData = new FormData(form);
+    var form = document.getElementById('surveyForm');
+    var formData = new FormData(form);
     
     // バリデーションチェック
-    const storeSelected = document.querySelector('input[name="store"]:checked');
-    const ratingSelected = document.querySelector('input[name="rating"]:checked');
+    var storeSelected = document.querySelector('input[name="store"]:checked');
+    var ratingSelected = document.querySelector('input[name="rating"]:checked');
     
-    let hasErrors = false;
+    var hasErrors = false;
     
     // エラー状態をリセット
-    document.querySelectorAll('.validation-message').forEach(msg => {
+    document.querySelectorAll('.validation-message').forEach(function(msg) {
       msg.classList.remove('visible');
     });
-    document.querySelectorAll('.question.error').forEach(q => {
+    document.querySelectorAll('.question.error').forEach(function(q) {
       q.classList.remove('error');
     });
     
@@ -943,11 +953,11 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('global-validation').classList.add('visible');
       
       // 最初のエラーまでスクロール
-      const firstError = document.querySelector('.question.error');
+      var firstError = document.querySelector('.question.error');
       if (firstError) {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         firstError.classList.add('highlight');
-        setTimeout(() => {
+        setTimeout(function() {
           firstError.classList.remove('highlight');
         }, 1500);
       }
@@ -956,8 +966,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 以下、送信処理
-    const dataObj = {};
-    for (let [key, val] of formData.entries()) {
+    var dataObj = {};
+    formData.forEach(function(val, key) {
       if (dataObj[key]) {
         if (!Array.isArray(dataObj[key])) {
           dataObj[key] = [dataObj[key]];
@@ -966,14 +976,14 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         dataObj[key] = val;
       }
-    }
+    });
 
     // 評価と店舗の情報を取得
-    const rating = parseInt(dataObj.rating);
+    var rating = parseInt(dataObj.rating);
     selectedStore = dataObj.store || 'QUARTER';
 
     // 口コミ用コメント設定
-    let userComments = '';
+    var userComments = '';
     if (dataObj.improvement) userComments += dataObj.improvement + ' ';
     if (dataObj.otherComments) userComments += dataObj.otherComments;
     document.getElementById('comment-to-copy').value = userComments.trim();
@@ -995,33 +1005,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // データ送信
-    fetch(CONFIG.APPS_SCRIPT_WEBAPP_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams(dataObj)
-    })
-    .then(res => res.json())
-    .then(result => {
-      console.log('送信成功:', result);
-      if (!result.success) {
-        alert('エラーが発生しました: ' + result.error);
+    try {
+      var apiUrl = typeof CONFIG !== 'undefined' ? CONFIG.APPS_SCRIPT_WEBAPP_URL : '';
+      if (apiUrl) {
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams(dataObj)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(result) {
+          console.log('送信成功:', result);
+          if (!result.success) {
+            alert('エラーが発生しました: ' + result.error);
+          }
+        })
+        .catch(function(err) {
+          console.error('送信エラー:', err);
+          alert('送信中に問題が発生しました。もう一度お試しください。');
+        });
       }
-    })
-    .catch(err => {
-      console.error('送信エラー:', err);
-      alert('送信中に問題が発生しました。もう一度お試しください。');
-    });
+    } catch (e) {
+      console.error('データ送信エラー:', e);
+    }
   }
 
   // ナビゲーションバーの管理
   function initNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
+    var navItems = document.querySelectorAll('.nav-item');
     
     function updateNavigation() {
-      const viewportHeight = window.innerHeight;
-      const sections = {
+      var viewportHeight = window.innerHeight;
+      var sections = {
         store: Array.from(document.querySelectorAll('[data-section="store"]')),
         rating: Array.from(document.querySelectorAll('[data-section="rating"]')),
         info: Array.from(document.querySelectorAll('[data-section="info"]')),
@@ -1029,19 +1046,20 @@ document.addEventListener('DOMContentLoaded', function() {
         feedback: Array.from(document.querySelectorAll('[data-section="feedback"]'))
       };
       
-      let mostVisibleSection = 'store';
-      let maxVisibility = 0;
+      var mostVisibleSection = 'store';
+      var maxVisibility = 0;
       
-      for (const section in sections) {
-        const elements = sections[section];
+      for (var section in sections) {
+        var elements = sections[section];
         if (elements.length === 0) continue;
         
-        let sectionVisibility = 0;
-        for (const element of elements) {
-          const rect = element.getBoundingClientRect();
+        var sectionVisibility = 0;
+        for (var i = 0; i < elements.length; i++) {
+          var element = elements[i];
+          var rect = element.getBoundingClientRect();
           if (rect.top < viewportHeight && rect.bottom > 0) {
-            const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
-            const elementVisibility = visibleHeight / rect.height;
+            var visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+            var elementVisibility = visibleHeight / rect.height;
             sectionVisibility += elementVisibility;
           }
         }
@@ -1051,8 +1069,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
       
-      navItems.forEach(item => {
-        const itemSection = item.getAttribute('data-section');
+      navItems.forEach(function(item) {
+        var itemSection = item.getAttribute('data-section');
         if (itemSection === mostVisibleSection) {
           item.classList.add('active');
         } else {
@@ -1061,22 +1079,24 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     
-    navItems.forEach(item => {
+    navItems.forEach(function(item) {
       item.addEventListener('click', function() {
-        const targetSection = this.getAttribute('data-section');
-        const targetElements = document.querySelectorAll('[data-section="' + targetSection + '"]');
+        var targetSection = this.getAttribute('data-section');
+        var targetElements = document.querySelectorAll('[data-section="' + targetSection + '"]');
         
         if (targetElements.length > 0) {
           targetElements[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
-          setTimeout(() => {
-            navItems.forEach(navItem => navItem.classList.remove('active'));
-            this.classList.add('active');
+          setTimeout(function() {
+            navItems.forEach(function(navItem) {
+              navItem.classList.remove('active');
+            });
+            item.classList.add('active');
           }, 100);
         }
       });
     });
     
-    let scrollTimeout;
+    var scrollTimeout;
     window.addEventListener('scroll', function() {
       if (scrollTimeout) clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(updateNavigation, 100);
@@ -1087,15 +1107,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 星評価 UI の管理
   function initStarRating() {
-    const stars = document.querySelectorAll('.star');
-    const ratingScore = document.getElementById('ratingScore');
-    const scoreValue = document.getElementById('scoreValue');
-    const lowRatingWarning = document.getElementById('lowRatingWarning');
-    let selectedRating = 0;
+    var stars = document.querySelectorAll('.star');
+    var ratingScore = document.getElementById('ratingScore');
+    var scoreValue = document.getElementById('scoreValue');
+    var lowRatingWarning = document.getElementById('lowRatingWarning');
+    var selectedRating = 0;
     
-    stars.forEach(star => {
+    stars.forEach(function(star) {
       star.addEventListener('mouseover', function() {
-        const value = parseInt(star.getAttribute('data-value'));
+        var value = parseInt(star.getAttribute('data-value'));
         highlightStars(value);
       });
     });
@@ -1106,31 +1126,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('lowRatingWarning').style.display = 'none';
     
-    stars.forEach(star => {
+    stars.forEach(function(star) {
       star.addEventListener('click', function() {
-        const value = parseInt(star.getAttribute('data-value'));
+        var value = parseInt(star.getAttribute('data-value'));
         selectRating(value);
         star.classList.add('pulse');
-        setTimeout(() => star.classList.remove('pulse'), 300);
+        setTimeout(function() {
+          star.classList.remove('pulse');
+        }, 300);
       });
     });
     
     function highlightStars(count) {
-      stars.forEach(star => {
-        const starValue = parseInt(star.getAttribute('data-value'));
-        star.classList.toggle('active', starValue <= count);
+      stars.forEach(function(star) {
+        var starValue = parseInt(star.getAttribute('data-value'));
+        if (starValue <= count) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
       });
     }
     
     function showLowRatingWarning() {
       lowRatingWarning.classList.add('visible');
-      setTimeout(() => lowRatingWarning.classList.remove('visible'), 3000);
+      setTimeout(function() {
+        lowRatingWarning.classList.remove('visible');
+      }, 3000);
     }
     
     function selectRating(value) {
       selectedRating = value;
       highlightStars(value);
-      document.getElementById('star' + value).checked = true;
+      var radioBtn = document.getElementById('star' + value);
+      if (radioBtn) radioBtn.checked = true;
+      
       scoreValue.textContent = value;
       ratingScore.classList.add('visible');
       lowRatingWarning.classList.remove('visible');
@@ -1138,31 +1168,36 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // エラー状態の解除
       document.getElementById('question2').classList.remove('error');
-      document.getElementById('rating-validation').classList.remove('visible');
-      document.getElementById('global-validation').classList.remove('visible');
+      var ratingValidation = document.getElementById('rating-validation');
+      if (ratingValidation) ratingValidation.classList.remove('visible');
+      
+      var globalValidation = document.getElementById('global-validation');
+      if (globalValidation) globalValidation.classList.remove('visible');
     }
   }
 
   // 各質問の「回答済み」チェック
   function initFormNavigation() {
-    const questions = document.querySelectorAll('.question');
+    var questions = document.querySelectorAll('.question');
     
-    questions.forEach(question => {
-      const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
-      inputs.forEach(input => {
-        input.addEventListener('change', () => {
+    questions.forEach(function(question) {
+      var inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+      inputs.forEach(function(input) {
+        input.addEventListener('change', function() {
           question.classList.add('completed');
           
           // エラー状態解除
           question.classList.remove('error');
-          const validationMsg = question.querySelector('.validation-message');
+          var validationMsg = question.querySelector('.validation-message');
           if (validationMsg) validationMsg.classList.remove('visible');
-          document.getElementById('global-validation').classList.remove('visible');
+          
+          var globalValidation = document.getElementById('global-validation');
+          if (globalValidation) globalValidation.classList.remove('visible');
         });
       });
       
-      const textareas = question.querySelectorAll('textarea');
-      textareas.forEach(textarea => {
+      var textareas = question.querySelectorAll('textarea');
+      textareas.forEach(function(textarea) {
         textarea.addEventListener('input', function() {
           if (this.value.trim().length > 0) {
             question.classList.add('completed');
@@ -1175,58 +1210,82 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// コメントコピー機能 (グローバルスコープからアクセスできるようwindowに追加)
+// グローバル関数は後で定義（参照エラー防止）
 window.copyComment = function() {
-  const commentElement = document.getElementById('comment-to-copy');
+  var commentElement = document.getElementById('comment-to-copy');
+  if (!commentElement) return;
+  
   commentElement.select();
   
-  // 現代的なクリップボードAPIを使用し、正しい値をコピー
-  navigator.clipboard.writeText(commentElement.value)
-    .then(() => {
-      const copyButton = document.getElementById('copy-button');
-      const originalText = copyButton.textContent;
+  try {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(commentElement.value)
+        .then(function() {
+          var copyButton = document.getElementById('copy-button');
+          if (!copyButton) return;
+          
+          var originalText = copyButton.textContent;
+          copyButton.textContent = 'コピーしました！';
+          copyButton.style.backgroundColor = 'var(--secondary-color)';
+          
+          setTimeout(function() {
+            copyButton.textContent = originalText;
+            copyButton.style.backgroundColor = 'white';
+          }, 2000);
+        })
+        .catch(function(err) {
+          console.error('コピーエラー:', err);
+          fallbackCopy();
+        });
+    } else {
+      fallbackCopy();
+    }
+  } catch (e) {
+    console.error('クリップボードエラー:', e);
+    fallbackCopy();
+  }
+  
+  function fallbackCopy() {
+    try {
+      document.execCommand('copy');
+      var copyButton = document.getElementById('copy-button');
+      if (!copyButton) return;
+      
       copyButton.textContent = 'コピーしました！';
       copyButton.style.backgroundColor = 'var(--secondary-color)';
       
-      setTimeout(() => {
-        copyButton.textContent = originalText;
+      setTimeout(function() {
+        copyButton.textContent = 'コメントをコピー';
         copyButton.style.backgroundColor = 'white';
       }, 2000);
-    })
-    .catch(err => {
-      // エラー処理を追加
-      console.error('コピーエラー:', err);
-      
-      // 古いAPIをフォールバックとして使用
-      try {
-        document.execCommand('copy');
-        const copyButton = document.getElementById('copy-button');
-        copyButton.textContent = 'コピーしました！';
-        copyButton.style.backgroundColor = 'var(--secondary-color)';
-        
-        setTimeout(() => {
-          copyButton.textContent = 'コメントをコピー';
-          copyButton.style.backgroundColor = 'white';
-        }, 2000);
-      } catch (fallbackErr) {
-        alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
-      }
-    });
+    } catch (fallbackErr) {
+      alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
+    }
+  }
 };
 
-// Googleマップへリダイレクト (グローバルスコープからアクセスできるようwindowに追加)
+// Googleマップへリダイレクト
 window.redirectToGoogleMaps = function() {
-  // グローバル変数のスコープ問題対策
-  const selectedStore = document.querySelector('input[name="store"]:checked')?.value || 'QUARTER';
-  const url = CONFIG.STORE_REVIEW_URLS[selectedStore] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
-  window.open(url, '_blank');
+  try {
+    var selectedStore = document.querySelector('input[name="store"]:checked');
+    var storeName = selectedStore ? selectedStore.value : 'QUARTER';
+    
+    if (typeof CONFIG !== 'undefined' && CONFIG.STORE_REVIEW_URLS) {
+      var url = CONFIG.STORE_REVIEW_URLS[storeName] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
+      window.open(url, '_blank');
+    } else {
+      console.error('STORE_REVIEW_URLS が定義されていません');
+    }
+  } catch (e) {
+    console.error('リダイレクトエラー:', e);
+  }
 };
 
-// ページ読み込み完了時に警告を非表示 (念のため)
+// ページ読み込み完了時の処理
 window.addEventListener('load', function() {
   setTimeout(function() {
-    const warnings = document.querySelectorAll('.apps-script-warning, div[role="alert"], .script-application-auth');
-    warnings.forEach(el => {
+    var warnings = document.querySelectorAll('.apps-script-warning, div[role="alert"], .script-application-auth');
+    warnings.forEach(function(el) {
       if (el) el.style.display = 'none';
     });
   }, 100);
