@@ -1021,6 +1021,9 @@
       // フォーム本体を非表示
       form.style.display = 'none';
 
+      // ナビゲーションバーを非表示にする
+      document.querySelector('.nav-container').style.display = 'none';
+
       // 星の評価で分岐
       if (rating >= 4) {
         if (rating === 5) {
