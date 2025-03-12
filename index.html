@@ -7,19 +7,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
   <!-- Apps Script WebアプリのURL（/exec で終わる本番URL） -->
   <script>
-    // グローバル変数
-var selectedStore = '';
-var storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
-    const CONFIG = {
-      APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
-      STORE_REVIEW_URLS: {
-        'QUARTER': 'https://g.page/r/CfiWzYV0WLCdEBE/review',
-        'QUARTER RESORT': 'https://g.page/r/CUpu9_cAhdaGEBE/review',
-        'QUARTER SEASONS': 'https://g.page/r/CWAu_dLl0DJmEBE/review',
-        'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
-        'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
-      }
-    };
+   // グローバル変数としてCONFIGを定義
+  window.CONFIG = {
+    APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
+    STORE_REVIEW_URLS: {
+      'QUARTER': 'https://g.page/r/CfiWzYV0WLCdEBE/review',
+      'QUARTER RESORT': 'https://g.page/r/CUpu9_cAhdaGEBE/review',
+      'QUARTER SEASONS': 'https://g.page/r/CWAu_dLl0DJmEBE/review',
+      'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
+      'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
+    }
+  };
   </script>
   <style>
     /* -------------------------------
@@ -845,7 +843,7 @@ position: absolute;
   
   <!-- 送信ボタン -->
   <div class="submit-container">
-<button type="button" class="submit-button">送信する</button>
+<button type="button" id="submitButton" class="submit-button">送信する</button>
   </div>
 </form>
 
