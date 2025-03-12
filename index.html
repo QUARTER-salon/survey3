@@ -558,8 +558,8 @@
     <!-- 中央揃えの星評価UI -->
     <div class="star-rating-container">
       <div class="stars-row" id="starsContainer">
-        <span class="star" data-value="1" data-double-tap="true">★</span>
-        <span class="star" data-value="2" data-double-tap="true">★</span>
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
         <span class="star" data-value="3">★</span>
         <span class="star" data-value="4">★</span>
         <span class="star" data-value="5">★</span>
@@ -907,33 +907,18 @@
       document.getElementById('starsContainer').addEventListener('mouseout', function() {
         highlightStars(selectedRating);
       });
+
+      document.getElementById('lowRatingWarning').style.display = 'none';
+
       
       stars.forEach(star => {
-        let lastTap = 0;
-        star.addEventListener('click', function(event) {
-          const value = parseInt(star.getAttribute('data-value'));
-          const requiresDoubleTap = star.getAttribute('data-double-tap') === 'true';
-          
-          if (requiresDoubleTap) {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - lastTap;
-            if (tapLength < 300 && tapLength > 0) {
-              selectRating(value);
-              lastTap = 0;
-              star.classList.add('pulse');
-              setTimeout(() => star.classList.remove('pulse'), 300);
-            } else {
-              lastTap = currentTime;
-              showLowRatingWarning();
-              event.preventDefault();
-            }
-          } else {
-            selectRating(value);
-            star.classList.add('pulse');
-            setTimeout(() => star.classList.remove('pulse'), 300);
-          }
-        });
-      });
+  star.addEventListener('click', function() {
+    const value = parseInt(star.getAttribute('data-value'));
+    selectRating(value);
+    star.classList.add('pulse');
+    setTimeout(() => star.classList.remove('pulse'), 300);
+  });
+});
       
       function highlightStars(count) {
         stars.forEach(star => {
