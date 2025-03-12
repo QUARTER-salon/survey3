@@ -871,38 +871,8 @@
 </div>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-  console.log('フォーム初期化');
-  
-  // 送信ボタンに直接リスナーを追加（確実に動作させるため）
-  document.querySelector('.submit-button').addEventListener('click', function(e) {
-    console.log('送信ボタンクリック');
-    // フォームのバリデーションを手動で確認
-    const storeSelected = document.querySelector('input[name="store"]:checked');
-    const ratingSelected = document.querySelector('input[name="rating"]:checked');
+    console.log('フォーム初期化開始');
     
-    if (!storeSelected || !ratingSelected) {
-      e.preventDefault(); // 送信を防止
-      console.log('バリデーションエラー');
-      
-      // エラーメッセージを表示
-      if (!storeSelected) {
-        document.getElementById('question1').classList.add('error');
-        document.getElementById('store-validation').classList.add('visible');
-      }
-      if (!ratingSelected) {
-        document.getElementById('question2').classList.add('error');
-        document.getElementById('rating-validation').classList.add('visible');
-      }
-      
-      document.getElementById('global-validation').classList.add('visible');
-      // 最初のエラー項目にスクロール
-      document.querySelector('.question.error').scrollIntoView({behavior: 'smooth'});
-      return false;
-    }
-  });
-  
-  // 残りのコードはそのまま...
-  document.addEventListener('DOMContentLoaded', function() {
     // グローバル変数として宣言し、スコープを正しく保持
     let selectedStore = '';
     const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
@@ -913,6 +883,37 @@
 
     // フォーム送信
     document.getElementById('surveyForm').addEventListener('submit', handleSubmit);
+    
+    // 送信ボタンに直接リスナーも追加（確実に動作させるため）
+    document.querySelector('.submit-button').addEventListener('click', function(e) {
+      console.log('送信ボタンクリック');
+      // フォームのバリデーションを手動で確認
+      const storeSelected = document.querySelector('input[name="store"]:checked');
+      const ratingSelected = document.querySelector('input[name="rating"]:checked');
+      
+      if (!storeSelected || !ratingSelected) {
+        e.preventDefault(); // 送信を防止
+        console.log('バリデーションエラー');
+        
+        // エラーメッセージを表示
+        if (!storeSelected) {
+          document.getElementById('question1').classList.add('error');
+          document.getElementById('store-validation').classList.add('visible');
+        }
+        if (!ratingSelected) {
+          document.getElementById('question2').classList.add('error');
+          document.getElementById('rating-validation').classList.add('visible');
+        }
+        
+        document.getElementById('global-validation').classList.add('visible');
+        // 最初のエラー項目にスクロール
+        const firstError = document.querySelector('.question.error');
+        if (firstError) {
+          firstError.scrollIntoView({behavior: 'smooth'});
+        }
+        return false;
+      }
+    });
 
     // -----------------------------
     // ナビゲーションバーの管理
@@ -1008,16 +1009,15 @@
       });
 
       document.getElementById('lowRatingWarning').style.display = 'none';
-
       
       stars.forEach(star => {
-  star.addEventListener('click', function() {
-    const value = parseInt(star.getAttribute('data-value'));
-    selectRating(value);
-    star.classList.add('pulse');
-    setTimeout(() => star.classList.remove('pulse'), 300);
-  });
-});
+        star.addEventListener('click', function() {
+          const value = parseInt(star.getAttribute('data-value'));
+          selectRating(value);
+          star.classList.add('pulse');
+          setTimeout(() => star.classList.remove('pulse'), 300);
+        });
+      });
       
       function highlightStars(count) {
         stars.forEach(star => {
@@ -1031,222 +1031,222 @@
         setTimeout(() => lowRatingWarning.classList.remove('visible'), 3000);
       }
       
-function selectRating(value) {
-  selectedRating = value;
-  highlightStars(value);
-  document.getElementById('star' + value).checked = true;
-  scoreValue.textContent = value;
-  ratingScore.classList.add('visible');
-  lowRatingWarning.classList.remove('visible');
-  document.getElementById('question2').classList.add('completed');
-  
-  // エラー状態の解除
-  document.getElementById('question2').classList.remove('error');
-  document.getElementById('rating-validation').classList.remove('visible');
-  document.getElementById('global-validation').classList.remove('visible');
-}
+      function selectRating(value) {
+        selectedRating = value;
+        highlightStars(value);
+        document.getElementById('star' + value).checked = true;
+        scoreValue.textContent = value;
+        ratingScore.classList.add('visible');
+        lowRatingWarning.classList.remove('visible');
+        document.getElementById('question2').classList.add('completed');
+        
+        // エラー状態の解除
+        document.getElementById('question2').classList.remove('error');
+        document.getElementById('rating-validation').classList.remove('visible');
+        document.getElementById('global-validation').classList.remove('visible');
+      }
     }
 
     // -----------------------------
     // 各質問の「回答済み」チェック
     // -----------------------------
-function initFormNavigation() {
-  const questions = document.querySelectorAll('.question');
-  
-  questions.forEach(question => {
-    const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
-    inputs.forEach(input => {
-      input.addEventListener('change', () => {
-        question.classList.add('completed');
+    function initFormNavigation() {
+      const questions = document.querySelectorAll('.question');
+      
+      questions.forEach(question => {
+        const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+        inputs.forEach(input => {
+          input.addEventListener('change', () => {
+            question.classList.add('completed');
+            
+            // エラー状態解除
+            question.classList.remove('error');
+            const validationMsg = question.querySelector('.validation-message');
+            if (validationMsg) validationMsg.classList.remove('visible');
+            document.getElementById('global-validation').classList.remove('visible');
+          });
+        });
         
-        // エラー状態解除
-        question.classList.remove('error');
-        const validationMsg = question.querySelector('.validation-message');
-        if (validationMsg) validationMsg.classList.remove('visible');
-        document.getElementById('global-validation').classList.remove('visible');
+        const textareas = question.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+          textarea.addEventListener('input', function() {
+            if (this.value.trim().length > 0) {
+              question.classList.add('completed');
+            } else {
+              question.classList.remove('completed');
+            }
+          });
+        });
       });
-    });
-    
-    const textareas = question.querySelectorAll('textarea');
-    textareas.forEach(textarea => {
-      textarea.addEventListener('input', function() {
-        if (this.value.trim().length > 0) {
-          question.classList.add('completed');
-        } else {
-          question.classList.remove('completed');
-        }
-      });
-    });
-  });
-}
+    }
 
     // -----------------------------
     // フォーム送信処理
     // -----------------------------
-function handleSubmit(event) {
-  event.preventDefault();
-  const form = event.target;
-  const formData = new FormData(form);
+    function handleSubmit(event) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
 
-  // バリデーションチェック
-  const storeSelected = formData.get('store');
-  const ratingSelected = formData.get('rating');
-  
-  let hasErrors = false;
-  
-  // すべてのバリデーションメッセージとエラー状態をリセット
-  document.querySelectorAll('.validation-message').forEach(msg => {
-    msg.classList.remove('visible');
-  });
-  document.querySelectorAll('.question.error').forEach(q => {
-    q.classList.remove('error');
-  });
-  
-  // 店舗選択のバリデーション
-  if (!storeSelected) {
-    document.getElementById('question1').classList.add('error');
-    document.getElementById('store-validation').classList.add('visible');
-    hasErrors = true;
-  }
-  
-  // 評価選択のバリデーション
-  if (!ratingSelected) {
-    document.getElementById('question2').classList.add('error');
-    document.getElementById('rating-validation').classList.add('visible');
-    hasErrors = true;
-  }
-  
-  // エラーがある場合はグローバルメッセージを表示
-  if (hasErrors) {
-    document.getElementById('global-validation').classList.add('visible');
-    
-    // 最初のエラーまでスクロール
-    const firstError = document.querySelector('.question.error');
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      firstError.classList.add('highlight');
-      setTimeout(() => {
-        firstError.classList.remove('highlight');
-      }, 1500);
-    }
-    
-    return; // フォーム送信を停止
-  }
-
-  // 以下、元のコード続行
-  // 複数チェックボックス対策: 同じキーは配列にまとめる
-  const dataObj = {};
-  for (let [key, val] of formData.entries()) {
-    if (dataObj[key]) {
-      // すでに何か入ってたら配列化
-      if (!Array.isArray(dataObj[key])) {
-        dataObj[key] = [dataObj[key]];
-      }
-      dataObj[key].push(val);
-    } else {
-      dataObj[key] = val;
-    }
-  }
-
-  // 評価 & 店舗など取得
-  const rating = parseInt(dataObj.rating);
-  // グローバルのselectedStoreに値を設定
-  selectedStore = dataObj.store || 'QUARTER';
-
-  // 口コミ用コメント(星4以上時)
-  let userComments = '';
-  if (dataObj.improvement) userComments += dataObj.improvement + ' ';
-  if (dataObj.otherComments) userComments += dataObj.otherComments;
-  document.getElementById('comment-to-copy').value = userComments.trim();
-
-  // フォーム本体を非表示
-  form.style.display = 'none';
-
-  // ナビゲーションバーを非表示にする
-  document.querySelector('.nav-container').style.display = 'none';
-
-  // 星の評価で分岐
-  if (rating >= 4) {
-    if (rating === 5) {
-      document.querySelector('#review-redirect h2').textContent = '星5ありがとうございます！';
-    } else {
-      document.querySelector('#review-redirect h2').textContent = '星4ありがとうございます！';
-    }
-    document.getElementById('review-redirect').style.display = 'block';
-  } else {
-    document.getElementById('thankyou').style.display = 'block';
-  }
-
-  // 送信 (URLエンコード形式)
-  fetch(CONFIG.APPS_SCRIPT_WEBAPP_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: new URLSearchParams(dataObj)
-  })
-  .then(res => res.json())
-  .then(result => {
-    console.log('送信成功:', result);
-    if (!result.success) {
-      alert('エラーが発生しました: ' + result.error);
-    }
-  })
-  .catch(err => {
-    console.error('送信エラー:', err);
-    alert('送信中に問題が発生しました。もう一度お試しください。');
-  });
-}
-    
-    // コメントコピー機能 (グローバルスコープからアクセスできるようwindowに追加)
-    window.copyComment = function() {
-      const commentElement = document.getElementById('comment-to-copy');
-      commentElement.select();
+      // バリデーションチェック
+      const storeSelected = formData.get('store');
+      const ratingSelected = formData.get('rating');
       
-      // 現代的なクリップボードAPIを使用し、正しい値をコピー
-      navigator.clipboard.writeText(commentElement.value)
-        .then(() => {
+      let hasErrors = false;
+      
+      // すべてのバリデーションメッセージとエラー状態をリセット
+      document.querySelectorAll('.validation-message').forEach(msg => {
+        msg.classList.remove('visible');
+      });
+      document.querySelectorAll('.question.error').forEach(q => {
+        q.classList.remove('error');
+      });
+      
+      // 店舗選択のバリデーション
+      if (!storeSelected) {
+        document.getElementById('question1').classList.add('error');
+        document.getElementById('store-validation').classList.add('visible');
+        hasErrors = true;
+      }
+      
+      // 評価選択のバリデーション
+      if (!ratingSelected) {
+        document.getElementById('question2').classList.add('error');
+        document.getElementById('rating-validation').classList.add('visible');
+        hasErrors = true;
+      }
+      
+      // エラーがある場合はグローバルメッセージを表示
+      if (hasErrors) {
+        document.getElementById('global-validation').classList.add('visible');
+        
+        // 最初のエラーまでスクロール
+        const firstError = document.querySelector('.question.error');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstError.classList.add('highlight');
+          setTimeout(() => {
+            firstError.classList.remove('highlight');
+          }, 1500);
+        }
+        
+        return; // フォーム送信を停止
+      }
+
+      // 以下、元のコード続行
+      // 複数チェックボックス対策: 同じキーは配列にまとめる
+      const dataObj = {};
+      for (let [key, val] of formData.entries()) {
+        if (dataObj[key]) {
+          // すでに何か入ってたら配列化
+          if (!Array.isArray(dataObj[key])) {
+            dataObj[key] = [dataObj[key]];
+          }
+          dataObj[key].push(val);
+        } else {
+          dataObj[key] = val;
+        }
+      }
+
+      // 評価 & 店舗など取得
+      const rating = parseInt(dataObj.rating);
+      // グローバルのselectedStoreに値を設定
+      selectedStore = dataObj.store || 'QUARTER';
+
+      // 口コミ用コメント(星4以上時)
+      let userComments = '';
+      if (dataObj.improvement) userComments += dataObj.improvement + ' ';
+      if (dataObj.otherComments) userComments += dataObj.otherComments;
+      document.getElementById('comment-to-copy').value = userComments.trim();
+
+      // フォーム本体を非表示
+      form.style.display = 'none';
+
+      // ナビゲーションバーを非表示にする
+      document.querySelector('.nav-container').style.display = 'none';
+
+      // 星の評価で分岐
+      if (rating >= 4) {
+        if (rating === 5) {
+          document.querySelector('#review-redirect h2').textContent = '星5ありがとうございます！';
+        } else {
+          document.querySelector('#review-redirect h2').textContent = '星4ありがとうございます！';
+        }
+        document.getElementById('review-redirect').style.display = 'block';
+      } else {
+        document.getElementById('thankyou').style.display = 'block';
+      }
+
+      // 送信 (URLエンコード形式)
+      fetch(CONFIG.APPS_SCRIPT_WEBAPP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(dataObj)
+      })
+      .then(res => res.json())
+      .then(result => {
+        console.log('送信成功:', result);
+        if (!result.success) {
+          alert('エラーが発生しました: ' + result.error);
+        }
+      })
+      .catch(err => {
+        console.error('送信エラー:', err);
+        alert('送信中に問題が発生しました。もう一度お試しください。');
+      });
+    }
+  });
+
+  // コメントコピー機能 (グローバルスコープからアクセスできるようwindowに追加)
+  window.copyComment = function() {
+    const commentElement = document.getElementById('comment-to-copy');
+    commentElement.select();
+    
+    // 現代的なクリップボードAPIを使用し、正しい値をコピー
+    navigator.clipboard.writeText(commentElement.value)
+      .then(() => {
+        const copyButton = document.getElementById('copy-button');
+        const originalText = copyButton.textContent;
+        copyButton.textContent = 'コピーしました！';
+        copyButton.style.backgroundColor = 'var(--secondary-color)';
+        
+        setTimeout(() => {
+          copyButton.textContent = originalText;
+          copyButton.style.backgroundColor = 'white';
+        }, 2000);
+      })
+      .catch(err => {
+        // エラー処理を追加
+        console.error('コピーエラー:', err);
+        
+        // 古いAPIをフォールバックとして使用
+        try {
+          document.execCommand('copy');
           const copyButton = document.getElementById('copy-button');
-          const originalText = copyButton.textContent;
           copyButton.textContent = 'コピーしました！';
           copyButton.style.backgroundColor = 'var(--secondary-color)';
           
           setTimeout(() => {
-            copyButton.textContent = originalText;
+            copyButton.textContent = 'コメントをコピー';
             copyButton.style.backgroundColor = 'white';
           }, 2000);
-        })
-        .catch(err => {
-          // エラー処理を追加
-          console.error('コピーエラー:', err);
-          
-          // 古いAPIをフォールバックとして使用
-          try {
-            document.execCommand('copy');
-            const copyButton = document.getElementById('copy-button');
-            copyButton.textContent = 'コピーしました！';
-            copyButton.style.backgroundColor = 'var(--secondary-color)';
-            
-            setTimeout(() => {
-              copyButton.textContent = 'コメントをコピー';
-              copyButton.style.backgroundColor = 'white';
-            }, 2000);
-          } catch (fallbackErr) {
-            alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
-          }
-        });
-    };
-    
-    // Googleマップへリダイレクト (グローバルスコープからアクセスできるようwindowに追加)
-    window.redirectToGoogleMaps = function() {
-      // オプショナルチェーニングを使わないバージョン
-      const storeElement = document.querySelector('input[name="store"]:checked');
-      // グローバル変数のselectedStoreを使用
-      const storeToUse = selectedStore || (storeElement ? storeElement.value : 'QUARTER');
-      const url = storeReviewUrls[storeToUse] || storeReviewUrls['QUARTER'];
-      window.open(url, '_blank');
-    };
-  });
+        } catch (fallbackErr) {
+          alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
+        }
+      });
+  };
+  
+  // Googleマップへリダイレクト (グローバルスコープからアクセスできるようwindowに追加)
+  window.redirectToGoogleMaps = function() {
+    // オプショナルチェーニングを使わないバージョン
+    const storeElement = document.querySelector('input[name="store"]:checked');
+    // グローバル変数のselectedStoreを使用
+    const storeToUse = selectedStore || (storeElement ? storeElement.value : 'QUARTER');
+    const url = storeReviewUrls[storeToUse] || storeReviewUrls['QUARTER'];
+    window.open(url, '_blank');
+  };
 
   // -----------------------------
   // ページ読み込み完了時に警告を非表示 (念のため)
