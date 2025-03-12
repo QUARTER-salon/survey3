@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>QUARTERアンケート</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Apps Script WebアプリのURL（/exec で終わる本番URL） -->
+  <script>
+    const CONFIG = {
+      APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
+      STORE_REVIEW_URLS: {
+        'QUARTER': 'https://g.page/r/CfiWzYV0WLCdEBE/review',
+        'QUARTER RESORT': 'https://g.page/r/CUpu9_cAhdaGEBE/review',
+        'QUARTER SEASONS': 'https://g.page/r/CWAu_dLl0DJmEBE/review',
+        'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
+        'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
+      }
+    };
+  </script>
+
+  <style>
+    /* -------------------------------
+       リセット + 全体スタイル
+       ------------------------------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    :root {
+      --primary-color: #4285F4;
+      --primary-light: rgba(66, 133, 244, 0.08);
+      --secondary-color: #34A853;
+      --accent-color: #FFC107;
+      --danger-color: #EA4335;
+      --gray-100: #f8f9fa;
+      --gray-200: #f1f3f4;
+      --gray-300: #e0e0e0;
+      --gray-400: #bdc1c6;
+      --gray-700: #5f6368;
+      --gray-900: #202124;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+    }
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background-color: var(--gray-100);
+      color: var(--gray-900);
+      line-height: 1.6;
+      padding-bottom: 100px;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: var(--spacing-md);
+    }
+
+    /* -------------------------------
+       ヘッダー
+       ------------------------------- */
+    header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+    }
+    .text-logo {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: 2px;
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* -------------------------------
+       固定ナビゲーションバー
+       ------------------------------- */
+    .nav-container {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+      background-color: white;
+      padding: 0;
+      margin: 0 auto var(--spacing-lg);
+      max-width: 600px;
+    }
+    .progress-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 10px 0;
+      background-color: white;
+      border-radius: 30px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      padding: 10px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-700);
+      transition: color 0.3s ease;
+    }
+    .nav-item.active .nav-text {
+      color: var(--primary-color);
+      font-weight: 700;
+    }
+    .nav-indicator {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background-color: var(--primary-color);
+      transition: width 0.3s ease;
+    }
+    .nav-item.active .nav-indicator {
+      width: 60%;
+    }
+
+    /* -------------------------------
+       質問カード
+       ------------------------------- */
+    .question {
+      margin-bottom: var(--spacing-xl);
+      background-color: white;
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-top: 4px solid transparent;
+    }
+    .question.current {
+      border-top-color: var(--primary-color);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .question.completed {
+      border-left: 4px solid var(--secondary-color);
+    }
+    h3 {
+      font-size: 16px;
+      margin-bottom: var(--spacing-md);
+      font-weight: 500;
+      color: var(--gray-900);
+    }
+
+    /* -------------------------------
+       ラジオボタン & チェックボックス
+       ------------------------------- */
+    .options label {
+      display: block;
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
+      background-color: white;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+      position: relative;
+      overflow: hidden;
+      border-left: 4px solid transparent;
+    }
+    .options input[type="radio"],
+    .options input[type="checkbox"] {
+      display: none;
+    }
+    .options label:hover {
+      background-color: var(--gray-100);
+      transform: translateX(3px);
+      box-shadow: var(--shadow-sm);
+    }
+    .options input[type="radio"]:checked + label,
+    .options input[type="checkbox"]:checked + label {
+      background-color: var(--primary-light);
+      border-color: var(--gray-400);
+      border-left: 4px solid var(--primary-color);
+      box-shadow: var(--shadow-sm);
+      font-weight: 500;
+      transform: translateX(5px);
+    }
+    .options input[type="radio"]:checked + label::after,
+    .options input[type="checkbox"]:checked + label::after {
+      content: "✓";
+      position: absolute;
+      right: var(--spacing-md);
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+
+    /* -------------------------------
+       星評価
+       ------------------------------- */
+    .star-rating-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--spacing-xl) 0;
+    }
+    .stars-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--spacing-md);
+    }
+    .star {
+      font-size: 42px;
+      cursor: pointer;
+      color: var(--gray-300);
+      transition: all 0.2s ease;
+      user-select: none;
+      padding: 0 var(--spacing-sm);
+      transform-origin: center;
+    }
+    .star:hover {
+      transform: scale(1.1);
+    }
+    .star.active {
+      color: var(--accent-color);
+    }
+    .star-rating-hidden {
+      display: none;
+    }
+    .rating-score {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin: var(--spacing-sm) 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-align: center;
+    }
+    .rating-score.visible {
+      opacity: 1;
+    }
+    .low-rating-warning {
+      width: 100%;
+      max-width: 400px;
+      margin: var(--spacing-md) auto 0;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background-color: #fef7e0;
+      border-left: 4px solid var(--accent-color);
+      color: var(--gray-900);
+      font-size: 14px;
+      display: none;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .low-rating-warning.visible {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .star.pulse {
+      animation: pulse 0.3s ease;
+    }
+
+    /* -------------------------------
+       テキストエリア
+       ------------------------------- */
+    textarea {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      resize: vertical;
+      font-family: inherit;
+      font-size: 16px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+      outline: none;
+    }
+
+    /* -------------------------------
+       送信ボタン
+       ------------------------------- */
+    .submit-container {
+      text-align: center;
+      margin-top: var(--spacing-xl);
+      position: relative;
+    }
+    .submit-button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: var(--spacing-md) var(--spacing-xl);
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .submit-button:hover {
+      background-color: #3367d6;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .submit-button:active {
+      transform: translateY(0);
+    }
+
+    /* -------------------------------
+       装飾とヘルパー
+       ------------------------------- */
+    .required h3::after {
+      content: " *";
+      color: var(--danger-color);
+    }
+    .optional-note {
+      text-align: center;
+      margin: var(--spacing-xl) 0;
+      color: var(--gray-700);
+      font-size: 14px;
+      background-color: var(--gray-100);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-sm);
+    }
+    .hidden {
+      display: none;
+    }
+
+    /* -------------------------------
+       サンクスページ & 口コミ誘導
+       ------------------------------- */
+    #thankyou, #review-redirect {
+      text-align: center;
+      padding: var(--spacing-xl) var(--spacing-md);
+      background-color: white;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      margin-top: var(--spacing-xl);
+    }
+    #thankyou h2, #review-redirect h2 {
+      margin-bottom: var(--spacing-md);
+      font-size: 24px;
+      color: var(--gray-900);
+    }
+    #review-redirect p {
+      margin-bottom: var(--spacing-md);
+      color: var(--gray-700);
+    }
+
+    /* -------------------------------
+       コピーボタン
+       ------------------------------- */
+    .copy-container {
+      margin: var(--spacing-xl) 0;
+    }
+    #comment-to-copy {
+      width: 100%;
+      height: 100px;
+      margin-bottom: var(--spacing-md);
+      padding: var(--spacing-md);
+      background-color: var(--gray-100);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-300);
+    }
+    .action-button {
+      border: none;
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+      margin: 0 var(--spacing-xs) var(--spacing-md);
+    }
+    #copy-button {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    #redirect-button {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    .action-button:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    /* -------------------------------
+       レスポンシブ対応
+       ------------------------------- */
+    @media (max-width: 480px) {
+      .container {
+        padding: var(--spacing-sm);
+      }
+      .question {
+        padding: var(--spacing-md);
+      }
+      h3 {
+        font-size: 15px;
+      }
+      .options label {
+        font-size: 15px;
+      }
+      .submit-button,
+      .action-button {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+      }
+      .star {
+        font-size: 38px;
+        padding: 0 var(--spacing-xs);
+      }
+      .nav-text {
+        font-size: 12px;
+      }
+      .nav-item {
+        padding: 8px 0;
+      }
+    }
+
+    /* -------------------------------
+       Google Apps Script 警告を非表示
+       ------------------------------- */
+    .apps-script-warning,
+    div[role="alert"],
+    .script-application-auth-container,
+    .script-application-auth {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    body, html {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+    #sandboxFrame {
+      margin-top: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img 
+    class="text-logo" 
+    src="https://drive.google.com/uc?export=view&id=1--ZbowsAa_UNCX8DqyVCY76lIjLAc9eA" 
+    alt="QUARTERロゴ" 
+    style="max-width: 200px; height: auto;" 
+  >
+
+    </header>
+    
+    <!-- 固定ナビゲーションバー -->
+    <div class="nav-container">
+      <div class="progress-nav">
+        <div class="nav-item active" data-section="store">
+          <span class="nav-text">店舗</span>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-item" data-section="rating">
+          <span class="nav-text">評価</span>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-item" data-section="info">
+          <span class="nav-text">情報</span>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-item" data-section="service">
+          <span class="nav-text">サービス</span>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-item" data-section="feedback">
+          <span class="nav-text">感想</span>
+          <div class="nav-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- アンケートフォーム -->
+    <form id="surveyForm">
+      <!-- 必須質問：ご来店店舗 -->
+      <div class="question required current" id="question1" data-section="store">
+        <h3>Q1. 本日はどちらの店舗をご利用いただきましたか？</h3>
+        <div class="options">
+          <input type="radio" id="quarter" name="store" value="QUARTER" required>
+          <label for="quarter">QUARTER</label><br>
+          
+          <input type="radio" id="quarter-resort" name="store" value="QUARTER RESORT">
+          <label for="quarter-resort">QUARTER RESORT</label><br>
+          
+          <input type="radio" id="quarter-seasons" name="store" value="QUARTER SEASONS">
+          <label for="quarter-seasons">QUARTER SEASONS</label><br>
+          
+          <input type="radio" id="link" name="store" value="LINK">
+          <label for="link">LINK</label><br>
+          
+          <input type="radio" id="il" name="store" value="iL">
+          <label for="il">iL</label>
+        </div>
+      </div>
+      
+      <!-- 必須質問：総合評価（Google風星評価） -->
+      <div class="question required" id="question2" data-section="rating">
+        <h3>Q2. 本日の総合評価を星1～5でお選びください。</h3>
+        
+        <!-- 中央揃えの星評価UI -->
+        <div class="star-rating-container">
+          <div class="stars-row" id="starsContainer">
+            <span class="star" data-value="1" data-double-tap="true">★</span>
+            <span class="star" data-value="2" data-double-tap="true">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+          
+          <div class="rating-score" id="ratingScore">
+            評価: <span id="scoreValue">0</span>/5
+          </div>
+          
+          <div class="low-rating-warning" id="lowRatingWarning">
+            <strong>低評価を選択するには:</strong> 星（1-2）をダブルタップしてください
+          </div>
+        </div>
+        
+        <!-- 実際のフォーム送信用の隠しラジオボタン -->
+        <div class="star-rating-hidden">
+          <input type="radio" id="star5" name="rating" value="5" required>
+          <input type="radio" id="star4" name="rating" value="4">
+          <input type="radio" id="star3" name="rating" value="3">
+          <input type="radio" id="star2" name="rating" value="2">
+          <input type="radio" id="star1" name="rating" value="1">
+        </div>
+      </div>
+      
+      <div class="optional-questions">
+        <p class="optional-note">
+          以下の質問は任意です。ご回答いただけると大変参考になります。
+        </p>
+        
+        <!-- お名前 -->
+        <div class="question" id="question3" data-section="info">
+          <h3>Q3. お名前、またはニックネームをお書きください。（任意）</h3>
+          <textarea name="name" rows="1" placeholder="お名前またはニックネームをご記入ください"></textarea>
+        </div>
+        
+        <!-- 新規 or 常連 -->
+        <div class="question" id="question4" data-section="info">
+          <h3>Q4. 当店をご利用になるのは…（任意）</h3>
+          <div class="options">
+            <input type="radio" id="first-time" name="visitType" value="初めて（新規）">
+            <label for="first-time">初めて（新規）</label><br>
+            
+            <input type="radio" id="repeat" name="visitType" value="2回目以降（常連）">
+            <label for="repeat">2回目以降（常連）</label>
+          </div>
+        </div>
+        
+        <!-- 性別 -->
+        <div class="question" id="question5" data-section="info">
+          <h3>Q5. お客様の性別を教えてください。（任意）</h3>
+          <div class="options">
+            <input type="radio" id="male" name="gender" value="男性">
+            <label for="male">男性</label><br>
+            
+            <input type="radio" id="female" name="gender" value="女性">
+            <label for="female">女性</label><br>
+            
+            <input type="radio" id="other" name="gender" value="その他">
+            <label for="other">その他</label>
+          </div>
+        </div>
+        
+        <!-- 年齢 -->
+        <div class="question" id="question6" data-section="info">
+          <h3>Q6. お客様のご年齢を教えてください。（任意）</h3>
+          <div class="options">
+            <input type="radio" id="age10s" name="age" value="10代">
+            <label for="age10s">10代</label><br>
+            
+            <input type="radio" id="age20s" name="age" value="20代">
+            <label for="age20s">20代</label><br>
+            
+            <input type="radio" id="age30s" name="age" value="30代">
+            <label for="age30s">30代</label><br>
+            
+            <input type="radio" id="age40s" name="age" value="40代">
+            <label for="age40s">40代</label><br>
+            
+            <input type="radio" id="age50s" name="age" value="50代">
+            <label for="age50s">50代</label><br>
+            
+            <input type="radio" id="age60plus" name="age" value="60代以上">
+            <label for="age60plus">60代以上</label>
+          </div>
+        </div>
+        
+        <!-- 利用サービス -->
+        <div class="question" id="question7" data-section="service">
+          <h3>Q7. 本日ご利用いただいたサービスを教えてください。（複数選択可）</h3>
+          <div class="options">
+            <input type="checkbox" id="cut" name="services" value="カット">
+            <label for="cut">カット</label><br>
+            
+            <input type="checkbox" id="color" name="services" value="カラー">
+            <label for="color">カラー</label><br>
+            
+            <input type="checkbox" id="perm" name="services" value="パーマ">
+            <label for="perm">パーマ</label><br>
+            
+            <input type="checkbox" id="treatment" name="services" value="トリートメント">
+            <label for="treatment">トリートメント</label><br>
+            
+            <input type="checkbox" id="styling" name="services" value="スタイリング">
+            <label for="styling">スタイリング</label><br>
+            
+            <input type="checkbox" id="other-service" name="services" value="その他">
+            <label for="other-service">その他（ネイル・着付け 等）</label>
+          </div>
+        </div>
+        
+        <!-- サービス満足度 -->
+        <div class="question" id="question8" data-section="service">
+          <h3>Q8. 技術や仕上がりに対する満足度をお聞かせください。</h3>
+          <div class="options">
+            <input type="radio" id="service5" name="serviceSatisfaction" value="非常に満足">
+            <label for="service5">非常に満足</label><br>
+            
+            <input type="radio" id="service4" name="serviceSatisfaction" value="満足">
+            <label for="service4">満足</label><br>
+            
+            <input type="radio" id="service3" name="serviceSatisfaction" value="普通">
+            <label for="service3">普通</label><br>
+            
+            <input type="radio" id="service2" name="serviceSatisfaction" value="不満">
+            <label for="service2">不満</label><br>
+            
+            <input type="radio" id="service1" name="serviceSatisfaction" value="非常に不満">
+            <label for="service1">非常に不満</label>
+          </div>
+        </div>
+        
+        <!-- スタッフ対応 -->
+        <div class="question" id="question9" data-section="service">
+          <h3>Q9. スタッフの対応はいかがでしたか？</h3>
+          <div class="options">
+            <input type="radio" id="staff5" name="staffResponse" value="非常に良い">
+            <label for="staff5">非常に良い</label><br>
+            
+            <input type="radio" id="staff4" name="staffResponse" value="良い">
+            <label for="staff4">良い</label><br>
+            
+            <input type="radio" id="staff3" name="staffResponse" value="普通">
+            <label for="staff3">普通</label><br>
+            
+            <input type="radio" id="staff2" name="staffResponse" value="悪い">
+            <label for="staff2">悪い</label><br>
+            
+            <input type="radio" id="staff1" name="staffResponse" value="非常に悪い">
+            <label for="staff1">非常に悪い</label>
+          </div>
+        </div>
+        
+        <!-- 待ち時間 -->
+        <div class="question" id="question10" data-section="service">
+          <h3>Q10. 待ち時間に関してのご感想をお聞かせください。</h3>
+          <div class="options">
+            <input type="radio" id="wait5" name="waitTime" value="非常に満足">
+            <label for="wait5">非常に満足</label><br>
+            
+            <input type="radio" id="wait4" name="waitTime" value="満足">
+            <label for="wait4">満足</label><br>
+            
+            <input type="radio" id="wait3" name="waitTime" value="普通">
+            <label for="wait3">普通</label><br>
+            
+            <input type="radio" id="wait2" name="waitTime" value="不満">
+            <label for="wait2">不満</label><br>
+            
+            <input type="radio" id="wait1" name="waitTime" value="非常に不満">
+            <label for="wait1">非常に不満</label>
+          </div>
+        </div>
+        
+        <!-- 店内清潔感 -->
+        <div class="question" id="question11" data-section="service">
+          <h3>Q11. 店内の清潔感についての印象をお選びください。</h3>
+          <div class="options">
+            <input type="radio" id="clean5" name="cleanliness" value="非常に清潔">
+            <label for="clean5">非常に清潔</label><br>
+            
+            <input type="radio" id="clean4" name="cleanliness" value="清潔">
+            <label for="clean4">清潔</label><br>
+            
+            <input type="radio" id="clean3" name="cleanliness" value="普通">
+            <label for="clean3">普通</label><br>
+            
+            <input type="radio" id="clean2" name="cleanliness" value="不清潔">
+            <label for="clean2">不清潔</label><br>
+            
+            <input type="radio" id="clean1" name="cleanliness" value="非常に不清潔">
+            <label for="clean1">非常に不清潔</label>
+          </div>
+        </div>
+        
+        <!-- 追加してほしいサービス・改善点 -->
+        <div class="question" id="question12" data-section="feedback">
+          <h3>Q12. もし何か追加してほしいサービス・改善点、またはご要望等ございましたら、自由にお書きください。（任意）</h3>
+          <textarea name="improvement" rows="3" placeholder="ご意見をご記入ください"></textarea>
+        </div>
+        
+        <!-- その他ご感想 -->
+        <div class="question" id="question13" data-section="feedback">
+          <h3>Q13. その他お気づきの点やご感想があれば、ぜひお書きください。（任意）</h3>
+          <textarea name="otherComments" rows="3" placeholder="ご感想をご記入ください"></textarea>
+        </div>
+      </div>
+      
+      <!-- 送信ボタン -->
+      <div class="submit-container">
+        <button type="submit" class="submit-button">送信する</button>
+      </div>
+    </form>
+    
+    <!-- 星3以下用のメッセージ -->
+    <div id="thankyou" class="hidden">
+      <h2>ご回答ありがとうございました。</h2>
+      <p>貴重なご意見を参考に、より良いサービスを目指します。</p>
+    </div>
+    
+    <!-- 星4以上用の口コミ促進メッセージ -->
+    <div id="review-redirect" class="hidden">
+      <h2>星4以上ありがとうございます！</h2>
+      <p>いつも当店をご利用いただき、誠にありがとうございます。</p>
+      <p>もしよろしければ、以下のコメントをコピーして「Googleマップ」にご投稿いただけますと大変励みになります。</p>
+      <p>
+        - ボタンを押すと簡単にコピーできます<br>
+        - 投稿ページが開いたらペーストしていただくだけでOKです
+      </p>
+      
+      <div class="copy-container">
+        <textarea id="comment-to-copy" readonly></textarea>
+        <div>
+          <button id="copy-button" class="action-button" onclick="copyComment()">コメントをコピー</button>
+          <button id="redirect-button" class="action-button" onclick="redirectToGoogleMaps()">Googleマップで口コミを投稿する</button>
+        </div>
+      </div>
+      
+      <p>
+        今後とも皆様に喜んでいただけるよう、スタッフ一同さらに技術を磨いてまいります。<br>
+        どうぞよろしくお願いいたします。
+      </p>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let selectedStore = '';
+    const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
+
+    initNavigation();
+    initStarRating();
+    initFormNavigation();
+
+    // フォーム送信
+    document.getElementById('surveyForm').addEventListener('submit', handleSubmit);
+
+    // -----------------------------
+    // ナビゲーションバーの管理
+    // -----------------------------
+    function initNavigation() {
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      function updateNavigation() {
+        const viewportHeight = window.innerHeight;
+        const sections = {
+          store: Array.from(document.querySelectorAll('[data-section="store"]')),
+          rating: Array.from(document.querySelectorAll('[data-section="rating"]')),
+          info: Array.from(document.querySelectorAll('[data-section="info"]')),
+          service: Array.from(document.querySelectorAll('[data-section="service"]')),
+          feedback: Array.from(document.querySelectorAll('[data-section="feedback"]'))
+        };
+        
+        let mostVisibleSection = 'store';
+        let maxVisibility = 0;
+        
+        for (const section in sections) {
+          const elements = sections[section];
+          if (elements.length === 0) continue;
+          
+          let sectionVisibility = 0;
+          for (const element of elements) {
+            const rect = element.getBoundingClientRect();
+            if (rect.top < viewportHeight && rect.bottom > 0) {
+              const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+              const elementVisibility = visibleHeight / rect.height;
+              sectionVisibility += elementVisibility;
+            }
+          }
+          if (sectionVisibility > maxVisibility) {
+            maxVisibility = sectionVisibility;
+            mostVisibleSection = section;
+          }
+        }
+        
+        navItems.forEach(item => {
+          const itemSection = item.getAttribute('data-section');
+          if (itemSection === mostVisibleSection) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+      
+      navItems.forEach(item => {
+        item.addEventListener('click', function() {
+          const targetSection = this.getAttribute('data-section');
+          const targetElements = document.querySelectorAll('[data-section="' + targetSection + '"]');
+          
+          if (targetElements.length > 0) {
+            targetElements[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+              navItems.forEach(navItem => navItem.classList.remove('active'));
+              this.classList.add('active');
+            }, 100);
+          }
+        });
+      });
+      
+      let scrollTimeout;
+      window.addEventListener('scroll', function() {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(updateNavigation, 100);
+      });
+      
+      updateNavigation();
+    }
+
+    // -----------------------------
+    // 星評価 UI の管理
+    // -----------------------------
+    function initStarRating() {
+      const stars = document.querySelectorAll('.star');
+      const ratingScore = document.getElementById('ratingScore');
+      const scoreValue = document.getElementById('scoreValue');
+      const lowRatingWarning = document.getElementById('lowRatingWarning');
+      let selectedRating = 0;
+      
+      stars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+          const value = parseInt(star.getAttribute('data-value'));
+          highlightStars(value);
+        });
+      });
+      
+      document.getElementById('starsContainer').addEventListener('mouseout', function() {
+        highlightStars(selectedRating);
+      });
+      
+      stars.forEach(star => {
+        let lastTap = 0;
+        star.addEventListener('click', function(event) {
+          const value = parseInt(star.getAttribute('data-value'));
+          const requiresDoubleTap = star.getAttribute('data-double-tap') === 'true';
+          
+          if (requiresDoubleTap) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+              selectRating(value);
+              lastTap = 0;
+              star.classList.add('pulse');
+              setTimeout(() => star.classList.remove('pulse'), 300);
+            } else {
+              lastTap = currentTime;
+              showLowRatingWarning();
+              event.preventDefault();
+            }
+          } else {
+            selectRating(value);
+            star.classList.add('pulse');
+            setTimeout(() => star.classList.remove('pulse'), 300);
+          }
+        });
+      });
+      
+      function highlightStars(count) {
+        stars.forEach(star => {
+          const starValue = parseInt(star.getAttribute('data-value'));
+          star.classList.toggle('active', starValue <= count);
+        });
+      }
+      
+      function showLowRatingWarning() {
+        lowRatingWarning.classList.add('visible');
+        setTimeout(() => lowRatingWarning.classList.remove('visible'), 3000);
+      }
+      
+      function selectRating(value) {
+        selectedRating = value;
+        highlightStars(value);
+        document.getElementById('star' + value).checked = true;
+        scoreValue.textContent = value;
+        ratingScore.classList.add('visible');
+        lowRatingWarning.classList.remove('visible');
+        document.getElementById('question2').classList.add('completed');
+      }
+    }
+
+    // -----------------------------
+    // 各質問の「回答済み」チェック
+    // -----------------------------
+    function initFormNavigation() {
+      const questions = document.querySelectorAll('.question');
+      
+      questions.forEach(question => {
+        const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+        inputs.forEach(input => {
+          input.addEventListener('change', () => {
+            question.classList.add('completed');
+          });
+        });
+        
+        const textareas = question.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+          textarea.addEventListener('input', function() {
+            if (this.value.trim().length > 0) {
+              question.classList.add('completed');
+            } else {
+              question.classList.remove('completed');
+            }
+          });
+        });
+      });
+    }
+
+    // -----------------------------
+    // フォーム送信処理
+    // -----------------------------
+    function handleSubmit(event) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+
+      // 複数チェックボックス対策: 同じキーは配列にまとめる
+      const dataObj = {};
+      for (let [key, val] of formData.entries()) {
+        if (dataObj[key]) {
+          // すでに何か入ってたら配列化
+          if (!Array.isArray(dataObj[key])) {
+            dataObj[key] = [dataObj[key]];
+          }
+          dataObj[key].push(val);
+        } else {
+          dataObj[key] = val;
+        }
+      }
+
+      // 評価 & 店舗など取得
+      const rating = parseInt(dataObj.rating);
+      selectedStore = dataObj.store || '';
+
+      // 口コミ用コメント(星4以上時)
+      let userComments = '';
+      if (dataObj.improvement) userComments += dataObj.improvement + ' ';
+      if (dataObj.otherComments) userComments += dataObj.otherComments;
+      document.getElementById('comment-to-copy').value = userComments.trim();
+
+      // フォーム本体を非表示
+      form.style.display = 'none';
+
+      // 星の評価で分岐
+      if (rating >= 4) {
+        if (rating === 5) {
+          document.querySelector('#review-redirect h2').textContent = '星5ありがとうございます！';
+        } else {
+          document.querySelector('#review-redirect h2').textContent = '星4ありがとうございます！';
+        }
+        document.getElementById('review-redirect').style.display = 'block';
+      } else {
+        document.getElementById('thankyou').style.display = 'block';
+      }
+
+      // 送信 (URLエンコード形式)
+      fetch(CONFIG.APPS_SCRIPT_WEBAPP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(dataObj)
+      })
+      .then(res => res.json())
+      .then(result => {
+        console.log('送信成功:', result);
+        if (!result.success) {
+          alert('エラーが発生しました: ' + result.error);
+        }
+      })
+      .catch(err => {
+        console.error('送信エラー:', err);
+        alert('送信中に問題が発生しました。もう一度お試しください。');
+      });
+    }
+  });
+
+  // -----------------------------
+  // コメントコピー機能
+  // -----------------------------
+  function copyComment() {
+    const commentElement = document.getElementById('comment-to-copy');
+    commentElement.select();
+    document.execCommand('copy');
+    
+    const copyButton = document.getElementById('copy-button');
+    const originalText = copyButton.textContent;
+    copyButton.textContent = 'コピーしました！';
+    copyButton.style.backgroundColor = '#34A853';
+    
+    setTimeout(() => {
+      copyButton.textContent = originalText;
+      copyButton.style.backgroundColor = '#4285F4';
+    }, 2000);
+  }
+
+  // -----------------------------
+  // Googleマップへリダイレクト
+  // -----------------------------
+  function redirectToGoogleMaps() {
+    const selectedStore = document.querySelector('input[name="store"]:checked')?.value || 'QUARTER';
+    const url = CONFIG.STORE_REVIEW_URLS[selectedStore] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
+    window.open(url, '_blank');
+  }
+
+  // -----------------------------
+  // ページ読み込み完了時に警告を非表示 (念のため)
+  // -----------------------------
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      const warnings = document.querySelectorAll('.apps-script-warning, div[role="alert"], .script-application-auth');
+      warnings.forEach(el => {
+        if (el) el.style.display = 'none';
+      });
+    }, 100);
+  });
+  </script>
+</body>
+</html>
