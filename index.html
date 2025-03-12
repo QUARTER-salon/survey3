@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>QUARTERアンケート</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
   <!-- Apps Script WebアプリのURL（/exec で終わる本番URL） -->
   <script>
     const CONFIG = {
@@ -19,7 +18,6 @@
       }
     };
   </script>
-
   <style>
     /* -------------------------------
        リセット + 全体スタイル
@@ -30,40 +28,47 @@
       box-sizing: border-box;
     }
     :root {
-      --primary-color: #4285F4;
-      --primary-light: rgba(66, 133, 244, 0.08);
-      --secondary-color: #34A853;
-      --accent-color: #FFC107;
+      --primary-color: #C39000; /* リッチゴールド */
+      --primary-light: rgba(195, 144, 0, 0.08);
+      --secondary-color: #9F8C55; /* マットゴールド */
+      --accent-color: #D0A900; /* ゴールド */
       --danger-color: #EA4335;
+      --background-color: #F9F6F0; /* 淡いベージュ */
+      --text-color: #333333; /* 文字色 */
+      --border-color: #E6D8B3; /* シャンパンベージュ */
       --gray-100: #f8f9fa;
       --gray-200: #f1f3f4;
       --gray-300: #e0e0e0;
       --gray-400: #bdc1c6;
       --gray-700: #5f6368;
-      --gray-900: #202124;
+      --gray-900: #333333;
       --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
       --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.08);
       --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
-      --radius-sm: 4px;
-      --radius-md: 8px;
-      --radius-lg: 12px;
+      --radius-sm: 0px; /* 角を四角に */
+      --radius-md: 0px;
+      --radius-lg: 0px;
       --spacing-xs: 4px;
       --spacing-sm: 8px;
       --spacing-md: 16px;
       --spacing-lg: 24px;
       --spacing-xl: 32px;
+      --heading-font: 'Playfair Display', serif;
+      --body-font: 'Noto Sans JP', sans-serif;
     }
     body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background-color: var(--gray-100);
-      color: var(--gray-900);
+      font-family: var(--body-font);
+      background-color: var(--background-color);
+      color: var(--text-color);
       line-height: 1.6;
       padding-bottom: 100px;
     }
     .container {
-      max-width: 640px;
+      max-width: 680px;
       margin: 0 auto;
       padding: var(--spacing-md);
+      background-color: white;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
     }
 
     /* -------------------------------
@@ -73,12 +78,15 @@
       text-align: center;
       margin-bottom: var(--spacing-xl);
       padding-top: var(--spacing-lg);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-lg);
     }
     .text-logo {
+      font-family: var(--heading-font);
       font-size: 32px;
       font-weight: 700;
-      color: var(--gray-900);
-      letter-spacing: 2px;
+      color: var(--text-color);
+      letter-spacing: 3px;
       margin-bottom: var(--spacing-md);
     }
 
@@ -94,43 +102,45 @@
       padding: 0;
       margin: 0 auto var(--spacing-lg);
       max-width: 600px;
+      border-bottom: 1px solid var(--border-color);
     }
     .progress-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      padding: 10px 0;
+      padding: 0;
       background-color: white;
-      border-radius: 30px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      box-shadow: var(--shadow-sm);
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
     }
     .nav-item {
       flex: 1;
       text-align: center;
       position: relative;
-      padding: 10px 0;
+      padding: 15px 0;
       cursor: pointer;
       transition: all 0.3s ease;
     }
     .nav-text {
       font-size: 14px;
-      font-weight: 500;
-      color: var(--gray-700);
+      font-weight: 400;
+      color: var(--text-color);
       transition: color 0.3s ease;
+      letter-spacing: 0.5px;
     }
     .nav-item.active .nav-text {
       color: var(--primary-color);
-      font-weight: 700;
+      font-weight: 500;
     }
     .nav-indicator {
       position: absolute;
-      bottom: -10px;
+      bottom: 0;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
-      height: 3px;
+      height: 2px;
       background-color: var(--primary-color);
       transition: width 0.3s ease;
     }
@@ -145,24 +155,29 @@
       margin-bottom: var(--spacing-xl);
       background-color: white;
       padding: var(--spacing-lg);
-      border-radius: var(--radius-md);
+      border-radius: 0;
       box-shadow: var(--shadow-sm);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border-top: 4px solid transparent;
+      border-top: 1px solid var(--border-color);
+      border-left: 1px solid var(--border-color);
+      position: relative;
     }
     .question.current {
-      border-top-color: var(--primary-color);
+      border-left: 3px solid var(--primary-color);
       transform: translateY(-3px);
       box-shadow: var(--shadow-md);
     }
     .question.completed {
-      border-left: 4px solid var(--secondary-color);
+      border-left: 3px solid var(--secondary-color);
     }
     h3 {
+      font-family: var(--body-font);
       font-size: 16px;
       margin-bottom: var(--spacing-md);
       font-weight: 500;
-      color: var(--gray-900);
+      color: var(--text-color);
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(230, 216, 179, 0.5);
     }
 
     /* -------------------------------
@@ -173,29 +188,29 @@
       padding: var(--spacing-md);
       margin-bottom: var(--spacing-sm);
       background-color: white;
-      border: 1px solid var(--gray-300);
-      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      border-radius: 0;
       cursor: pointer;
       transition: all 0.3s ease;
-      font-size: 16px;
+      font-size: 15px;
       position: relative;
       overflow: hidden;
-      border-left: 4px solid transparent;
+      border-left: 3px solid transparent;
     }
     .options input[type="radio"],
     .options input[type="checkbox"] {
       display: none;
     }
     .options label:hover {
-      background-color: var(--gray-100);
+      background-color: var(--background-color);
       transform: translateX(3px);
       box-shadow: var(--shadow-sm);
     }
     .options input[type="radio"]:checked + label,
     .options input[type="checkbox"]:checked + label {
-      background-color: var(--primary-light);
-      border-color: var(--gray-400);
-      border-left: 4px solid var(--primary-color);
+      background-color: rgba(230, 216, 179, 0.1);
+      border-color: var(--border-color);
+      border-left: 3px solid var(--primary-color);
       box-shadow: var(--shadow-sm);
       font-weight: 500;
       transform: translateX(5px);
@@ -244,7 +259,7 @@
     .rating-score {
       font-size: 16px;
       font-weight: 500;
-      color: var(--gray-700);
+      color: var(--text-color);
       margin: var(--spacing-sm) 0;
       opacity: 0;
       transition: opacity 0.3s ease;
@@ -259,11 +274,11 @@
       margin: var(--spacing-md) auto 0;
       padding: var(--spacing-sm) var(--spacing-md);
       background-color: #fef7e0;
-      border-left: 4px solid var(--accent-color);
-      color: var(--gray-900);
+      border-left: 3px solid var(--accent-color);
+      color: var(--text-color);
       font-size: 14px;
       display: none;
-      border-radius: var(--radius-sm);
+      border-radius: 0;
       text-align: center;
       animation: fadeIn 0.3s ease;
     }
@@ -289,16 +304,16 @@
     textarea {
       width: 100%;
       padding: var(--spacing-md);
-      border: 1px solid var(--gray-300);
-      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      border-radius: 0;
       resize: vertical;
-      font-family: inherit;
-      font-size: 16px;
+      font-family: var(--body-font);
+      font-size: 15px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
     textarea:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+      box-shadow: 0 0 0 2px rgba(195, 144, 0, 0.1);
       outline: none;
     }
 
@@ -311,20 +326,22 @@
       position: relative;
     }
     .submit-button {
-      background-color: var(--primary-color);
+      background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
       color: white;
       border: none;
-      padding: var(--spacing-md) var(--spacing-xl);
-      font-size: 16px;
+      padding: 12px 40px;
+      font-size: 14px;
       font-weight: 500;
-      border-radius: var(--radius-sm);
+      border-radius: 2px;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 3px 10px rgba(195, 144, 0, 0.2);
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
     .submit-button:hover {
-      background-color: #3367d6;
-      box-shadow: var(--shadow-md);
+      background: linear-gradient(135deg, #D0A900 0%, #B98600 100%);
+      box-shadow: 0 5px 15px rgba(195, 144, 0, 0.3);
       transform: translateY(-2px);
     }
     .submit-button:active {
@@ -341,11 +358,12 @@
     .optional-note {
       text-align: center;
       margin: var(--spacing-xl) 0;
-      color: var(--gray-700);
+      color: var(--text-color);
       font-size: 14px;
-      background-color: var(--gray-100);
+      background-color: var(--background-color);
       padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--radius-sm);
+      border-radius: 0;
+      border-left: 3px solid var(--secondary-color);
     }
     .hidden {
       display: none;
@@ -358,18 +376,22 @@
       text-align: center;
       padding: var(--spacing-xl) var(--spacing-md);
       background-color: white;
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-md);
+      border-radius: 0;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
       margin-top: var(--spacing-xl);
+      border-top: 1px solid var(--border-color);
+      border-left: 3px solid var(--primary-color);
     }
     #thankyou h2, #review-redirect h2 {
+      font-family: var(--heading-font);
       margin-bottom: var(--spacing-md);
       font-size: 24px;
-      color: var(--gray-900);
+      color: var(--text-color);
+      letter-spacing: 1px;
     }
     #review-redirect p {
       margin-bottom: var(--spacing-md);
-      color: var(--gray-700);
+      color: var(--text-color);
     }
 
     /* -------------------------------
@@ -383,28 +405,32 @@
       height: 100px;
       margin-bottom: var(--spacing-md);
       padding: var(--spacing-md);
-      background-color: var(--gray-100);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--gray-300);
+      background-color: var(--background-color);
+      border-radius: 0;
+      border: 1px solid var(--border-color);
     }
     .action-button {
-      border: none;
+      border: 1px solid var(--border-color);
       padding: var(--spacing-md) var(--spacing-lg);
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
-      border-radius: var(--radius-sm);
+      border-radius: 2px;
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: var(--shadow-sm);
       margin: 0 var(--spacing-xs) var(--spacing-md);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     #copy-button {
-      background-color: var(--primary-color);
-      color: white;
+      background-color: white;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
     }
     #redirect-button {
-      background-color: var(--danger-color);
+      background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
       color: white;
+      border: none;
     }
     .action-button:hover {
       box-shadow: var(--shadow-md);
@@ -425,7 +451,7 @@
         font-size: 15px;
       }
       .options label {
-        font-size: 15px;
+        font-size: 14px;
       }
       .submit-button,
       .action-button {
@@ -433,7 +459,7 @@
         margin-bottom: var(--spacing-sm);
       }
       .star {
-        font-size: 38px;
+        font-size: 36px;
         padding: 0 var(--spacing-xs);
       }
       .nav-text {
@@ -473,314 +499,310 @@
     class="text-logo" 
     src="./images/quarter-logo.png"
     alt="QUARTERロゴ" 
-    style="max-width: 200px; height: auto;" 
-  >
+    style="max-width: 200px; height: auto;">
+      </header>
 
-    </header>
-    
-    <!-- 固定ナビゲーションバー -->
-    <div class="nav-container">
-      <div class="progress-nav">
-        <div class="nav-item active" data-section="store">
-          <span class="nav-text">店舗</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="rating">
-          <span class="nav-text">評価</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="info">
-          <span class="nav-text">情報</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="service">
-          <span class="nav-text">サービス</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="feedback">
-          <span class="nav-text">感想</span>
-          <div class="nav-indicator"></div>
-        </div>
-      </div>
+<!-- 固定ナビゲーションバー -->
+<div class="nav-container">
+  <div class="progress-nav">
+    <div class="nav-item active" data-section="store">
+      <span class="nav-text">店舗</span>
+      <div class="nav-indicator"></div>
     </div>
-    
-    <!-- アンケートフォーム -->
-    <form id="surveyForm">
-      <!-- 必須質問：ご来店店舗 -->
-      <div class="question required current" id="question1" data-section="store">
-        <h3>Q1. 本日はどちらの店舗をご利用いただきましたか？</h3>
-        <div class="options">
-          <input type="radio" id="quarter" name="store" value="QUARTER" required>
-          <label for="quarter">QUARTER</label><br>
-          
-          <input type="radio" id="quarter-resort" name="store" value="QUARTER RESORT">
-          <label for="quarter-resort">QUARTER RESORT</label><br>
-          
-          <input type="radio" id="quarter-seasons" name="store" value="QUARTER SEASONS">
-          <label for="quarter-seasons">QUARTER SEASONS</label><br>
-          
-          <input type="radio" id="link" name="store" value="LINK">
-          <label for="link">LINK</label><br>
-          
-          <input type="radio" id="il" name="store" value="iL">
-          <label for="il">iL</label>
-        </div>
-      </div>
-      
-      <!-- 必須質問：総合評価（Google風星評価） -->
-      <div class="question required" id="question2" data-section="rating">
-        <h3>Q2. 本日の総合評価を星1～5でお選びください。</h3>
-        
-        <!-- 中央揃えの星評価UI -->
-        <div class="star-rating-container">
-          <div class="stars-row" id="starsContainer">
-            <span class="star" data-value="1" data-double-tap="true">★</span>
-            <span class="star" data-value="2" data-double-tap="true">★</span>
-            <span class="star" data-value="3">★</span>
-            <span class="star" data-value="4">★</span>
-            <span class="star" data-value="5">★</span>
-          </div>
-          
-          <div class="rating-score" id="ratingScore">
-            評価: <span id="scoreValue">0</span>/5
-          </div>
-          
-          <div class="low-rating-warning" id="lowRatingWarning">
-            <strong>低評価を選択するには:</strong> 星（1-2）をダブルタップしてください
-          </div>
-        </div>
-        
-        <!-- 実際のフォーム送信用の隠しラジオボタン -->
-        <div class="star-rating-hidden">
-          <input type="radio" id="star5" name="rating" value="5" required>
-          <input type="radio" id="star4" name="rating" value="4">
-          <input type="radio" id="star3" name="rating" value="3">
-          <input type="radio" id="star2" name="rating" value="2">
-          <input type="radio" id="star1" name="rating" value="1">
-        </div>
-      </div>
-      
-      <div class="optional-questions">
-        <p class="optional-note">
-          以下の質問は任意です。ご回答いただけると大変参考になります。
-        </p>
-        
-        <!-- お名前 -->
-        <div class="question" id="question3" data-section="info">
-          <h3>Q3. お名前、またはニックネームをお書きください。（任意）</h3>
-          <textarea name="name" rows="1" placeholder="お名前またはニックネームをご記入ください"></textarea>
-        </div>
-        
-        <!-- 新規 or 常連 -->
-        <div class="question" id="question4" data-section="info">
-          <h3>Q4. 当店をご利用になるのは…（任意）</h3>
-          <div class="options">
-            <input type="radio" id="first-time" name="visitType" value="初めて（新規）">
-            <label for="first-time">初めて（新規）</label><br>
-            
-            <input type="radio" id="repeat" name="visitType" value="2回目以降（常連）">
-            <label for="repeat">2回目以降（常連）</label>
-          </div>
-        </div>
-        
-        <!-- 性別 -->
-        <div class="question" id="question5" data-section="info">
-          <h3>Q5. お客様の性別を教えてください。（任意）</h3>
-          <div class="options">
-            <input type="radio" id="male" name="gender" value="男性">
-            <label for="male">男性</label><br>
-            
-            <input type="radio" id="female" name="gender" value="女性">
-            <label for="female">女性</label><br>
-            
-            <input type="radio" id="other" name="gender" value="その他">
-            <label for="other">その他</label>
-          </div>
-        </div>
-        
-        <!-- 年齢 -->
-        <div class="question" id="question6" data-section="info">
-          <h3>Q6. お客様のご年齢を教えてください。（任意）</h3>
-          <div class="options">
-            <input type="radio" id="age10s" name="age" value="10代">
-            <label for="age10s">10代</label><br>
-            
-            <input type="radio" id="age20s" name="age" value="20代">
-            <label for="age20s">20代</label><br>
-            
-            <input type="radio" id="age30s" name="age" value="30代">
-            <label for="age30s">30代</label><br>
-            
-            <input type="radio" id="age40s" name="age" value="40代">
-            <label for="age40s">40代</label><br>
-            
-            <input type="radio" id="age50s" name="age" value="50代">
-            <label for="age50s">50代</label><br>
-            
-            <input type="radio" id="age60plus" name="age" value="60代以上">
-            <label for="age60plus">60代以上</label>
-          </div>
-        </div>
-        
-        <!-- 利用サービス -->
-        <div class="question" id="question7" data-section="service">
-          <h3>Q7. 本日ご利用いただいたサービスを教えてください。（複数選択可）</h3>
-          <div class="options">
-            <input type="checkbox" id="cut" name="services" value="カット">
-            <label for="cut">カット</label><br>
-            
-            <input type="checkbox" id="color" name="services" value="カラー">
-            <label for="color">カラー</label><br>
-            
-            <input type="checkbox" id="perm" name="services" value="パーマ">
-            <label for="perm">パーマ</label><br>
-            
-            <input type="checkbox" id="treatment" name="services" value="トリートメント">
-            <label for="treatment">トリートメント</label><br>
-            
-            <input type="checkbox" id="styling" name="services" value="スタイリング">
-            <label for="styling">スタイリング</label><br>
-            
-            <input type="checkbox" id="other-service" name="services" value="その他">
-            <label for="other-service">その他（ネイル・着付け 等）</label>
-          </div>
-        </div>
-        
-        <!-- サービス満足度 -->
-        <div class="question" id="question8" data-section="service">
-          <h3>Q8. 技術や仕上がりに対する満足度をお聞かせください。</h3>
-          <div class="options">
-            <input type="radio" id="service5" name="serviceSatisfaction" value="非常に満足">
-            <label for="service5">非常に満足</label><br>
-            
-            <input type="radio" id="service4" name="serviceSatisfaction" value="満足">
-            <label for="service4">満足</label><br>
-            
-            <input type="radio" id="service3" name="serviceSatisfaction" value="普通">
-            <label for="service3">普通</label><br>
-            
-            <input type="radio" id="service2" name="serviceSatisfaction" value="不満">
-            <label for="service2">不満</label><br>
-            
-            <input type="radio" id="service1" name="serviceSatisfaction" value="非常に不満">
-            <label for="service1">非常に不満</label>
-          </div>
-        </div>
-        
-        <!-- スタッフ対応 -->
-        <div class="question" id="question9" data-section="service">
-          <h3>Q9. スタッフの対応はいかがでしたか？</h3>
-          <div class="options">
-            <input type="radio" id="staff5" name="staffResponse" value="非常に良い">
-            <label for="staff5">非常に良い</label><br>
-            
-            <input type="radio" id="staff4" name="staffResponse" value="良い">
-            <label for="staff4">良い</label><br>
-            
-            <input type="radio" id="staff3" name="staffResponse" value="普通">
-            <label for="staff3">普通</label><br>
-            
-            <input type="radio" id="staff2" name="staffResponse" value="悪い">
-            <label for="staff2">悪い</label><br>
-            
-            <input type="radio" id="staff1" name="staffResponse" value="非常に悪い">
-            <label for="staff1">非常に悪い</label>
-          </div>
-        </div>
-        
-        <!-- 待ち時間 -->
-        <div class="question" id="question10" data-section="service">
-          <h3>Q10. 待ち時間に関してのご感想をお聞かせください。</h3>
-          <div class="options">
-            <input type="radio" id="wait5" name="waitTime" value="非常に満足">
-            <label for="wait5">非常に満足</label><br>
-            
-            <input type="radio" id="wait4" name="waitTime" value="満足">
-            <label for="wait4">満足</label><br>
-            
-            <input type="radio" id="wait3" name="waitTime" value="普通">
-            <label for="wait3">普通</label><br>
-            
-            <input type="radio" id="wait2" name="waitTime" value="不満">
-            <label for="wait2">不満</label><br>
-            
-            <input type="radio" id="wait1" name="waitTime" value="非常に不満">
-            <label for="wait1">非常に不満</label>
-          </div>
-        </div>
-        
-        <!-- 店内清潔感 -->
-        <div class="question" id="question11" data-section="service">
-          <h3>Q11. 店内の清潔感についての印象をお選びください。</h3>
-          <div class="options">
-            <input type="radio" id="clean5" name="cleanliness" value="非常に清潔">
-            <label for="clean5">非常に清潔</label><br>
-            
-            <input type="radio" id="clean4" name="cleanliness" value="清潔">
-            <label for="clean4">清潔</label><br>
-            
-            <input type="radio" id="clean3" name="cleanliness" value="普通">
-            <label for="clean3">普通</label><br>
-            
-            <input type="radio" id="clean2" name="cleanliness" value="不清潔">
-            <label for="clean2">不清潔</label><br>
-            
-            <input type="radio" id="clean1" name="cleanliness" value="非常に不清潔">
-            <label for="clean1">非常に不清潔</label>
-          </div>
-        </div>
-        
-        <!-- 追加してほしいサービス・改善点 -->
-        <div class="question" id="question12" data-section="feedback">
-          <h3>Q12. もし何か追加してほしいサービス・改善点、またはご要望等ございましたら、自由にお書きください。（任意）</h3>
-          <textarea name="improvement" rows="3" placeholder="ご意見をご記入ください"></textarea>
-        </div>
-        
-        <!-- その他ご感想 -->
-        <div class="question" id="question13" data-section="feedback">
-          <h3>Q13. その他お気づきの点やご感想があれば、ぜひお書きください。（任意）</h3>
-          <textarea name="otherComments" rows="3" placeholder="ご感想をご記入ください"></textarea>
-        </div>
-      </div>
-      
-      <!-- 送信ボタン -->
-      <div class="submit-container">
-        <button type="submit" class="submit-button">送信する</button>
-      </div>
-    </form>
-    
-    <!-- 星3以下用のメッセージ -->
-    <div id="thankyou" class="hidden">
-      <h2>ご回答ありがとうございました。</h2>
-      <p>貴重なご意見を参考に、より良いサービスを目指します。</p>
+    <div class="nav-item" data-section="rating">
+      <span class="nav-text">評価</span>
+      <div class="nav-indicator"></div>
     </div>
-    
-    <!-- 星4以上用の口コミ促進メッセージ -->
-    <div id="review-redirect" class="hidden">
-      <h2>星4以上ありがとうございます！</h2>
-      <p>いつも当店をご利用いただき、誠にありがとうございます。</p>
-      <p>もしよろしければ、以下のコメントをコピーして「Googleマップ」にご投稿いただけますと大変励みになります。</p>
-      <p>
-        - ボタンを押すと簡単にコピーできます<br>
-        - 投稿ページが開いたらペーストしていただくだけでOKです
-      </p>
-      
-      <div class="copy-container">
-        <textarea id="comment-to-copy" readonly></textarea>
-        <div>
-          <button id="copy-button" class="action-button" onclick="copyComment()">コメントをコピー</button>
-          <button id="redirect-button" class="action-button" onclick="redirectToGoogleMaps()">Googleマップで口コミを投稿する</button>
-        </div>
-      </div>
-      
-      <p>
-        今後とも皆様に喜んでいただけるよう、スタッフ一同さらに技術を磨いてまいります。<br>
-        どうぞよろしくお願いいたします。
-      </p>
+    <div class="nav-item" data-section="info">
+      <span class="nav-text">情報</span>
+      <div class="nav-indicator"></div>
+    </div>
+    <div class="nav-item" data-section="service">
+      <span class="nav-text">サービス</span>
+      <div class="nav-indicator"></div>
+    </div>
+    <div class="nav-item" data-section="feedback">
+      <span class="nav-text">感想</span>
+      <div class="nav-indicator"></div>
     </div>
   </div>
+</div>
 
-  <script>
+<!-- アンケートフォーム -->
+<form id="surveyForm">
+  <!-- 必須質問：ご来店店舗 -->
+  <div class="question required current" id="question1" data-section="store">
+    <h3>Q1. 本日はどちらの店舗をご利用いただきましたか？</h3>
+    <div class="options">
+      <input type="radio" id="quarter" name="store" value="QUARTER" required>
+      <label for="quarter">QUARTER</label><br>
+      
+      <input type="radio" id="quarter-resort" name="store" value="QUARTER RESORT">
+      <label for="quarter-resort">QUARTER RESORT</label><br>
+      
+      <input type="radio" id="quarter-seasons" name="store" value="QUARTER SEASONS">
+      <label for="quarter-seasons">QUARTER SEASONS</label><br>
+      
+      <input type="radio" id="link" name="store" value="LINK">
+      <label for="link">LINK</label><br>
+      
+      <input type="radio" id="il" name="store" value="iL">
+      <label for="il">iL</label>
+    </div>
+  </div>
+  
+  <!-- 必須質問：総合評価（Google風星評価） -->
+  <div class="question required" id="question2" data-section="rating">
+    <h3>Q2. 本日の総合評価を星1～5でお選びください。</h3>
+    
+    <!-- 中央揃えの星評価UI -->
+    <div class="star-rating-container">
+      <div class="stars-row" id="starsContainer">
+        <span class="star" data-value="1" data-double-tap="true">★</span>
+        <span class="star" data-value="2" data-double-tap="true">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
+      
+      <div class="rating-score" id="ratingScore">
+        評価: <span id="scoreValue">0</span>/5
+      </div>
+      
+      <div class="low-rating-warning" id="lowRatingWarning">
+        <strong>低評価を選択するには:</strong> 星（1-2）をダブルタップしてください
+      </div>
+    </div>
+    
+    <!-- 実際のフォーム送信用の隠しラジオボタン -->
+    <div class="star-rating-hidden">
+      <input type="radio" id="star5" name="rating" value="5" required>
+      <input type="radio" id="star4" name="rating" value="4">
+      <input type="radio" id="star3" name="rating" value="3">
+      <input type="radio" id="star2" name="rating" value="2">
+      <input type="radio" id="star1" name="rating" value="1">
+    </div>
+  </div>
+  
+  <div class="optional-questions">
+    <p class="optional-note">
+      以下の質問は任意です。ご回答いただけると大変参考になります。
+    </p>
+    
+    <!-- お名前 -->
+    <div class="question" id="question3" data-section="info">
+      <h3>Q3. お名前、またはニックネームをお書きください。（任意）</h3>
+      <textarea name="name" rows="1" placeholder="お名前またはニックネームをご記入ください"></textarea>
+    </div>
+    
+    <!-- 新規 or 常連 -->
+    <div class="question" id="question4" data-section="info">
+      <h3>Q4. 当店をご利用になるのは…（任意）</h3>
+      <div class="options">
+        <input type="radio" id="first-time" name="visitType" value="初めて（新規）">
+        <label for="first-time">初めて（新規）</label><br>
+        
+        <input type="radio" id="repeat" name="visitType" value="2回目以降（常連）">
+        <label for="repeat">2回目以降（常連）</label>
+      </div>
+    </div>
+    
+    <!-- 性別 -->
+    <div class="question" id="question5" data-section="info">
+      <h3>Q5. お客様の性別を教えてください。（任意）</h3>
+      <div class="options">
+        <input type="radio" id="male" name="gender" value="男性">
+        <label for="male">男性</label><br>
+        
+        <input type="radio" id="female" name="gender" value="女性">
+        <label for="female">女性</label><br>
+        
+        <input type="radio" id="other" name="gender" value="その他">
+        <label for="other">その他</label>
+      </div>
+    </div>
+    
+    <!-- 年齢 -->
+    <div class="question" id="question6" data-section="info">
+      <h3>Q6. お客様のご年齢を教えてください。（任意）</h3>
+      <div class="options">
+        <input type="radio" id="age10s" name="age" value="10代">
+        <label for="age10s">10代</label><br>
+        
+        <input type="radio" id="age20s" name="age" value="20代">
+        <label for="age20s">20代</label><br>
+        
+        <input type="radio" id="age30s" name="age" value="30代">
+        <label for="age30s">30代</label><br>
+        
+        <input type="radio" id="age40s" name="age" value="40代">
+        <label for="age40s">40代</label><br>
+        
+        <input type="radio" id="age50s" name="age" value="50代">
+        <label for="age50s">50代</label><br>
+        
+        <input type="radio" id="age60plus" name="age" value="60代以上">
+        <label for="age60plus">60代以上</label>
+      </div>
+    </div>
+    
+    <!-- 利用サービス -->
+    <div class="question" id="question7" data-section="service">
+      <h3>Q7. 本日ご利用いただいたサービスを教えてください。（複数選択可）</h3>
+      <div class="options">
+        <input type="checkbox" id="cut" name="services" value="カット">
+        <label for="cut">カット</label><br>
+        
+        <input type="checkbox" id="color" name="services" value="カラー">
+        <label for="color">カラー</label><br>
+        
+        <input type="checkbox" id="perm" name="services" value="パーマ">
+        <label for="perm">パーマ</label><br>
+        
+        <input type="checkbox" id="treatment" name="services" value="トリートメント">
+        <label for="treatment">トリートメント</label><br>
+        
+        <input type="checkbox" id="styling" name="services" value="スタイリング">
+        <label for="styling">スタイリング</label><br>
+        
+        <input type="checkbox" id="other-service" name="services" value="その他">
+        <label for="other-service">その他（ネイル・着付け 等）</label>
+      </div>
+    </div>
+    
+    <!-- サービス満足度 -->
+    <div class="question" id="question8" data-section="service">
+      <h3>Q8. 技術や仕上がりに対する満足度をお聞かせください。</h3>
+      <div class="options">
+        <input type="radio" id="service5" name="serviceSatisfaction" value="非常に満足">
+        <label for="service5">非常に満足</label><br>
+        
+        <input type="radio" id="service4" name="serviceSatisfaction" value="満足">
+        <label for="service4">満足</label><br>
+        
+        <input type="radio" id="service3" name="serviceSatisfaction" value="普通">
+        <label for="service3">普通</label><br>
+        
+        <input type="radio" id="service2" name="serviceSatisfaction" value="不満">
+        <label for="service2">不満</label><br>
+        
+        <input type="radio" id="service1" name="serviceSatisfaction" value="非常に不満">
+        <label for="service1">非常に不満</label>
+      </div>
+    </div>
+    
+    <!-- スタッフ対応 -->
+    <div class="question" id="question9" data-section="service">
+      <h3>Q9. スタッフの対応はいかがでしたか？</h3>
+      <div class="options">
+        <input type="radio" id="staff5" name="staffResponse" value="非常に良い">
+        <label for="staff5">非常に良い</label><br>
+        
+        <input type="radio" id="staff4" name="staffResponse" value="良い">
+        <label for="staff4">良い</label><br>
+        
+        <input type="radio" id="staff3" name="staffResponse" value="普通">
+        <label for="staff3">普通</label><br>
+        
+        <input type="radio" id="staff2" name="staffResponse" value="悪い">
+        <label for="staff2">悪い</label><br>
+        
+        <input type="radio" id="staff1" name="staffResponse" value="非常に悪い">
+        <label for="staff1">非常に悪い</label>
+      </div>
+    </div>
+    
+    <!-- 待ち時間 -->
+    <div class="question" id="question10" data-section="service">
+      <h3>Q10. 待ち時間に関してのご感想をお聞かせください。</h3>
+      <div class="options">
+        <input type="radio" id="wait5" name="waitTime" value="非常に満足">
+        <label for="wait5">非常に満足</label><br>
+        
+        <input type="radio" id="wait4" name="waitTime" value="満足">
+        <label for="wait4">満足</label><br>
+        
+        <input type="radio" id="wait3" name="waitTime" value="普通">
+        <label for="wait3">普通</label><br>
+        
+        <input type="radio" id="wait2" name="waitTime" value="不満">
+        <label for="wait2">不満</label><br>
+        
+        <input type="radio" id="wait1" name="waitTime" value="非常に不満">
+        <label for="wait1">非常に不満</label>
+      </div>
+    </div>
+    
+    <!-- 店内清潔感 -->
+    <div class="question" id="question11" data-section="service">
+      <h3>Q11. 店内の清潔感についての印象をお選びください。</h3>
+      <div class="options">
+        <input type="radio" id="clean5" name="cleanliness" value="非常に清潔">
+        <label for="clean5">非常に清潔</label><br>
+        
+        <input type="radio" id="clean4" name="cleanliness" value="清潔">
+        <label for="clean4">清潔</label><br>
+        
+        <input type="radio" id="clean3" name="cleanliness" value="普通">
+        <label for="clean3">普通</label><br>
+        
+        <input type="radio" id="clean2" name="cleanliness" value="不清潔">
+        <label for="clean2">不清潔</label><br>
+        
+        <input type="radio" id="clean1" name="cleanliness" value="非常に不清潔">
+        <label for="clean1">非常に不清潔</label>
+      </div>
+    </div>
+    
+    <!-- 追加してほしいサービス・改善点 -->
+    <div class="question" id="question12" data-section="feedback">
+      <h3>Q12. もし何か追加してほしいサービス・改善点、またはご要望等ございましたら、自由にお書きください。（任意）</h3>
+      <textarea name="improvement" rows="3" placeholder="ご意見をご記入ください"></textarea>
+    </div>
+    
+    <!-- その他ご感想 -->
+    <div class="question" id="question13" data-section="feedback">
+      <h3>Q13. その他お気づきの点やご感想があれば、ぜひお書きください。（任意）</h3>
+      <textarea name="otherComments" rows="3" placeholder="ご感想をご記入ください"></textarea>
+    </div>
+  </div>
+  
+  <!-- 送信ボタン -->
+  <div class="submit-container">
+    <button type="submit" class="submit-button">送信する</button>
+  </div>
+</form>
+
+<!-- 星3以下用のメッセージ -->
+<div id="thankyou" class="hidden">
+  <h2>ご回答ありがとうございました。</h2>
+  <p>貴重なご意見を参考に、より良いサービスを目指します。</p>
+</div>
+
+<!-- 星4以上用の口コミ促進メッセージ -->
+<div id="review-redirect" class="hidden">
+  <h2>星4以上ありがとうございます！</h2>
+  <p>いつも当店をご利用いただき、誠にありがとうございます。</p>
+  <p>もしよろしければ、以下のコメントをコピーして「Googleマップ」にご投稿いただけますと大変励みになります。</p>
+  <p>
+    - ボタンを押すと簡単にコピーできます<br>
+    - 投稿ページが開いたらペーストしていただくだけでOKです
+  </p>
+  
+  <div class="copy-container">
+    <textarea id="comment-to-copy" readonly></textarea>
+    <div>
+      <button id="copy-button" class="action-button" onclick="copyComment()">コメントをコピー</button>
+      <button id="redirect-button" class="action-button" onclick="redirectToGoogleMaps()">Googleマップで口コミを投稿する</button>
+    </div>
+  </div>
+  
+  <p>
+    今後とも皆様に喜んでいただけるよう、スタッフ一同さらに技術を磨いてまいります。<br>
+    どうぞよろしくお願いいたします。
+  </p>
+</div>
+<script>
   document.addEventListener('DOMContentLoaded', function() {
     let selectedStore = '';
     const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
@@ -1042,11 +1064,11 @@
     const copyButton = document.getElementById('copy-button');
     const originalText = copyButton.textContent;
     copyButton.textContent = 'コピーしました！';
-    copyButton.style.backgroundColor = '#34A853';
+    copyButton.style.backgroundColor = var('--secondary-color');
     
     setTimeout(() => {
       copyButton.textContent = originalText;
-      copyButton.style.backgroundColor = '#4285F4';
+      copyButton.style.backgroundColor = 'white';
     }, 2000);
   }
 
@@ -1073,3 +1095,4 @@
   </script>
 </body>
 </html>
+  
