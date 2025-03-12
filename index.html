@@ -264,6 +264,7 @@ var storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
     .star-rating-hidden {
 position: absolute;
   opacity: 0;
+  pointer-events: none;
   width: 1px;
   height: 1px;
   overflow: hidden;    
@@ -844,7 +845,7 @@ position: absolute;
   
   <!-- 送信ボタン -->
   <div class="submit-container">
-    <button type="submit" class="submit-button">送信する</button>
+<button type="button" class="submit-button" id="submitButton">送信する</button>
   </div>
 </form>
 
@@ -878,395 +879,358 @@ position: absolute;
   </p>
 </div>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('フォーム初期化開始');
-    
-    // グローバル変数として宣言し、スコープを正しく保持
-    let selectedStore = '';
-    const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('フォーム初期化開始');
+  
+  // グローバル変数
+  let selectedStore = '';
+  const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
 
-    initNavigation();
-    initStarRating();
-    initFormNavigation();
+  // 初期化
+  initNavigation();
+  initStarRating();
+  initFormNavigation();
 
-    // フォーム送信
-    document.getElementById('surveyForm').addEventListener('submit', handleSubmit);
-    
-    // 送信ボタンに直接リスナーも追加（確実に動作させるため）
-    document.querySelector('.submit-button').addEventListener('click', function(e) {
-      console.log('送信ボタンクリック');
-      // フォームのバリデーションを手動で確認
-      const storeSelected = document.querySelector('input[name="store"]:checked');
-      const ratingSelected = document.querySelector('input[name="rating"]:checked');
-      
-      if (!storeSelected || !ratingSelected) {
-        e.preventDefault(); // 送信を防止
-        console.log('バリデーションエラー');
-        
-        // エラーメッセージを表示
-        if (!storeSelected) {
-          document.getElementById('question1').classList.add('error');
-          document.getElementById('store-validation').classList.add('visible');
-        }
-        if (!ratingSelected) {
-          document.getElementById('question2').classList.add('error');
-          document.getElementById('rating-validation').classList.add('visible');
-        }
-        
-        document.getElementById('global-validation').classList.add('visible');
-        // 最初のエラー項目にスクロール
-        const firstError = document.querySelector('.question.error');
-        if (firstError) {
-          firstError.scrollIntoView({behavior: 'smooth'});
-        }
-        return false;
-      }
+  // 送信ボタンにイベントリスナーを追加（タッチデバイス対応）
+  const submitButton = document.getElementById('submitButton');
+  if (submitButton) {
+    // クリックとタッチの両方をサポート
+    submitButton.addEventListener('click', validateAndSubmit);
+    submitButton.addEventListener('touchend', function(e) {
+      e.preventDefault(); // デフォルトのタッチ動作を防止
+      validateAndSubmit(e);
     });
+  }
 
-    // -----------------------------
-    // ナビゲーションバーの管理
-    // -----------------------------
-    function initNavigation() {
-      const navItems = document.querySelectorAll('.nav-item');
+  // バリデーションと送信処理を統合した関数
+  function validateAndSubmit(e) {
+    e.preventDefault();
+    console.log('送信処理開始');
+    
+    const form = document.getElementById('surveyForm');
+    const formData = new FormData(form);
+    
+    // バリデーションチェック
+    const storeSelected = document.querySelector('input[name="store"]:checked');
+    const ratingSelected = document.querySelector('input[name="rating"]:checked');
+    
+    let hasErrors = false;
+    
+    // エラー状態をリセット
+    document.querySelectorAll('.validation-message').forEach(msg => {
+      msg.classList.remove('visible');
+    });
+    document.querySelectorAll('.question.error').forEach(q => {
+      q.classList.remove('error');
+    });
+    
+    // 店舗選択のバリデーション
+    if (!storeSelected) {
+      document.getElementById('question1').classList.add('error');
+      document.getElementById('store-validation').classList.add('visible');
+      hasErrors = true;
+    }
+    
+    // 評価選択のバリデーション
+    if (!ratingSelected) {
+      document.getElementById('question2').classList.add('error');
+      document.getElementById('rating-validation').classList.add('visible');
+      hasErrors = true;
+    }
+    
+    // エラーがある場合の処理
+    if (hasErrors) {
+      document.getElementById('global-validation').classList.add('visible');
       
-      function updateNavigation() {
-        const viewportHeight = window.innerHeight;
-        const sections = {
-          store: Array.from(document.querySelectorAll('[data-section="store"]')),
-          rating: Array.from(document.querySelectorAll('[data-section="rating"]')),
-          info: Array.from(document.querySelectorAll('[data-section="info"]')),
-          service: Array.from(document.querySelectorAll('[data-section="service"]')),
-          feedback: Array.from(document.querySelectorAll('[data-section="feedback"]'))
-        };
+      // 最初のエラーまでスクロール
+      const firstError = document.querySelector('.question.error');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.classList.add('highlight');
+        setTimeout(() => {
+          firstError.classList.remove('highlight');
+        }, 1500);
+      }
+      
+      return false; // 送信を停止
+    }
+
+    // 以下、送信処理
+    const dataObj = {};
+    for (let [key, val] of formData.entries()) {
+      if (dataObj[key]) {
+        if (!Array.isArray(dataObj[key])) {
+          dataObj[key] = [dataObj[key]];
+        }
+        dataObj[key].push(val);
+      } else {
+        dataObj[key] = val;
+      }
+    }
+
+    // 評価と店舗の情報を取得
+    const rating = parseInt(dataObj.rating);
+    selectedStore = dataObj.store || 'QUARTER';
+
+    // 口コミ用コメント設定
+    let userComments = '';
+    if (dataObj.improvement) userComments += dataObj.improvement + ' ';
+    if (dataObj.otherComments) userComments += dataObj.otherComments;
+    document.getElementById('comment-to-copy').value = userComments.trim();
+
+    // フォーム非表示
+    form.style.display = 'none';
+    document.querySelector('.nav-container').style.display = 'none';
+
+    // 結果表示
+    if (rating >= 4) {
+      if (rating === 5) {
+        document.querySelector('#review-redirect h2').textContent = '星5ありがとうございます！';
+      } else {
+        document.querySelector('#review-redirect h2').textContent = '星4ありがとうございます！';
+      }
+      document.getElementById('review-redirect').style.display = 'block';
+    } else {
+      document.getElementById('thankyou').style.display = 'block';
+    }
+
+    // データ送信
+    fetch(CONFIG.APPS_SCRIPT_WEBAPP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams(dataObj)
+    })
+    .then(res => res.json())
+    .then(result => {
+      console.log('送信成功:', result);
+      if (!result.success) {
+        alert('エラーが発生しました: ' + result.error);
+      }
+    })
+    .catch(err => {
+      console.error('送信エラー:', err);
+      alert('送信中に問題が発生しました。もう一度お試しください。');
+    });
+  }
+
+  // ナビゲーションバーの管理
+  function initNavigation() {
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    function updateNavigation() {
+      const viewportHeight = window.innerHeight;
+      const sections = {
+        store: Array.from(document.querySelectorAll('[data-section="store"]')),
+        rating: Array.from(document.querySelectorAll('[data-section="rating"]')),
+        info: Array.from(document.querySelectorAll('[data-section="info"]')),
+        service: Array.from(document.querySelectorAll('[data-section="service"]')),
+        feedback: Array.from(document.querySelectorAll('[data-section="feedback"]'))
+      };
+      
+      let mostVisibleSection = 'store';
+      let maxVisibility = 0;
+      
+      for (const section in sections) {
+        const elements = sections[section];
+        if (elements.length === 0) continue;
         
-        let mostVisibleSection = 'store';
-        let maxVisibility = 0;
-        
-        for (const section in sections) {
-          const elements = sections[section];
-          if (elements.length === 0) continue;
-          
-          let sectionVisibility = 0;
-          for (const element of elements) {
-            const rect = element.getBoundingClientRect();
-            if (rect.top < viewportHeight && rect.bottom > 0) {
-              const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
-              const elementVisibility = visibleHeight / rect.height;
-              sectionVisibility += elementVisibility;
-            }
-          }
-          if (sectionVisibility > maxVisibility) {
-            maxVisibility = sectionVisibility;
-            mostVisibleSection = section;
+        let sectionVisibility = 0;
+        for (const element of elements) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top < viewportHeight && rect.bottom > 0) {
+            const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+            const elementVisibility = visibleHeight / rect.height;
+            sectionVisibility += elementVisibility;
           }
         }
-        
-        navItems.forEach(item => {
-          const itemSection = item.getAttribute('data-section');
-          if (itemSection === mostVisibleSection) {
-            item.classList.add('active');
-          } else {
-            item.classList.remove('active');
-          }
-        });
+        if (sectionVisibility > maxVisibility) {
+          maxVisibility = sectionVisibility;
+          mostVisibleSection = section;
+        }
       }
       
       navItems.forEach(item => {
-        item.addEventListener('click', function() {
-          const targetSection = this.getAttribute('data-section');
-          const targetElements = document.querySelectorAll('[data-section="' + targetSection + '"]');
-          
-          if (targetElements.length > 0) {
-            targetElements[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
-            setTimeout(() => {
-              navItems.forEach(navItem => navItem.classList.remove('active'));
-              this.classList.add('active');
-            }, 100);
-          }
-        });
-      });
-      
-      let scrollTimeout;
-      window.addEventListener('scroll', function() {
-        if (scrollTimeout) clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(updateNavigation, 100);
-      });
-      
-      updateNavigation();
-    }
-
-    // -----------------------------
-    // 星評価 UI の管理
-    // -----------------------------
-    function initStarRating() {
-      const stars = document.querySelectorAll('.star');
-      const ratingScore = document.getElementById('ratingScore');
-      const scoreValue = document.getElementById('scoreValue');
-      const lowRatingWarning = document.getElementById('lowRatingWarning');
-      let selectedRating = 0;
-      
-      stars.forEach(star => {
-        star.addEventListener('mouseover', function() {
-          const value = parseInt(star.getAttribute('data-value'));
-          highlightStars(value);
-        });
-      });
-      
-      document.getElementById('starsContainer').addEventListener('mouseout', function() {
-        highlightStars(selectedRating);
-      });
-
-      document.getElementById('lowRatingWarning').style.display = 'none';
-      
-      stars.forEach(star => {
-        star.addEventListener('click', function() {
-          const value = parseInt(star.getAttribute('data-value'));
-          selectRating(value);
-          star.classList.add('pulse');
-          setTimeout(() => star.classList.remove('pulse'), 300);
-        });
-      });
-      
-      function highlightStars(count) {
-        stars.forEach(star => {
-          const starValue = parseInt(star.getAttribute('data-value'));
-          star.classList.toggle('active', starValue <= count);
-        });
-      }
-      
-      function showLowRatingWarning() {
-        lowRatingWarning.classList.add('visible');
-        setTimeout(() => lowRatingWarning.classList.remove('visible'), 3000);
-      }
-      
-      function selectRating(value) {
-        selectedRating = value;
-        highlightStars(value);
-        document.getElementById('star' + value).checked = true;
-        scoreValue.textContent = value;
-        ratingScore.classList.add('visible');
-        lowRatingWarning.classList.remove('visible');
-        document.getElementById('question2').classList.add('completed');
-        
-        // エラー状態の解除
-        document.getElementById('question2').classList.remove('error');
-        document.getElementById('rating-validation').classList.remove('visible');
-        document.getElementById('global-validation').classList.remove('visible');
-      }
-    }
-
-    // -----------------------------
-    // 各質問の「回答済み」チェック
-    // -----------------------------
-    function initFormNavigation() {
-      const questions = document.querySelectorAll('.question');
-      
-      questions.forEach(question => {
-        const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
-        inputs.forEach(input => {
-          input.addEventListener('change', () => {
-            question.classList.add('completed');
-            
-            // エラー状態解除
-            question.classList.remove('error');
-            const validationMsg = question.querySelector('.validation-message');
-            if (validationMsg) validationMsg.classList.remove('visible');
-            document.getElementById('global-validation').classList.remove('visible');
-          });
-        });
-        
-        const textareas = question.querySelectorAll('textarea');
-        textareas.forEach(textarea => {
-          textarea.addEventListener('input', function() {
-            if (this.value.trim().length > 0) {
-              question.classList.add('completed');
-            } else {
-              question.classList.remove('completed');
-            }
-          });
-        });
-      });
-    }
-
-    // -----------------------------
-    // フォーム送信処理
-    // -----------------------------
-    function handleSubmit(event) {
-      event.preventDefault();
-      const form = event.target;
-      const formData = new FormData(form);
-
-      // バリデーションチェック
-      const storeSelected = formData.get('store');
-      const ratingSelected = formData.get('rating');
-      
-      let hasErrors = false;
-      
-      // すべてのバリデーションメッセージとエラー状態をリセット
-      document.querySelectorAll('.validation-message').forEach(msg => {
-        msg.classList.remove('visible');
-      });
-      document.querySelectorAll('.question.error').forEach(q => {
-        q.classList.remove('error');
-      });
-      
-      // 店舗選択のバリデーション
-      if (!storeSelected) {
-        document.getElementById('question1').classList.add('error');
-        document.getElementById('store-validation').classList.add('visible');
-        hasErrors = true;
-      }
-      
-      // 評価選択のバリデーション
-      if (!ratingSelected) {
-        document.getElementById('question2').classList.add('error');
-        document.getElementById('rating-validation').classList.add('visible');
-        hasErrors = true;
-      }
-      
-      // エラーがある場合はグローバルメッセージを表示
-      if (hasErrors) {
-        document.getElementById('global-validation').classList.add('visible');
-        
-        // 最初のエラーまでスクロール
-        const firstError = document.querySelector('.question.error');
-        if (firstError) {
-          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          firstError.classList.add('highlight');
-          setTimeout(() => {
-            firstError.classList.remove('highlight');
-          }, 1500);
-        }
-        
-        return; // フォーム送信を停止
-      }
-
-      // 以下、元のコード続行
-      // 複数チェックボックス対策: 同じキーは配列にまとめる
-      const dataObj = {};
-      for (let [key, val] of formData.entries()) {
-        if (dataObj[key]) {
-          // すでに何か入ってたら配列化
-          if (!Array.isArray(dataObj[key])) {
-            dataObj[key] = [dataObj[key]];
-          }
-          dataObj[key].push(val);
+        const itemSection = item.getAttribute('data-section');
+        if (itemSection === mostVisibleSection) {
+          item.classList.add('active');
         } else {
-          dataObj[key] = val;
+          item.classList.remove('active');
         }
-      }
-
-      // 評価 & 店舗など取得
-      const rating = parseInt(dataObj.rating);
-      // グローバルのselectedStoreに値を設定
-      selectedStore = dataObj.store || 'QUARTER';
-
-      // 口コミ用コメント(星4以上時)
-      let userComments = '';
-      if (dataObj.improvement) userComments += dataObj.improvement + ' ';
-      if (dataObj.otherComments) userComments += dataObj.otherComments;
-      document.getElementById('comment-to-copy').value = userComments.trim();
-
-      // フォーム本体を非表示
-      form.style.display = 'none';
-
-      // ナビゲーションバーを非表示にする
-      document.querySelector('.nav-container').style.display = 'none';
-
-      // 星の評価で分岐
-      if (rating >= 4) {
-        if (rating === 5) {
-          document.querySelector('#review-redirect h2').textContent = '星5ありがとうございます！';
-        } else {
-          document.querySelector('#review-redirect h2').textContent = '星4ありがとうございます！';
-        }
-        document.getElementById('review-redirect').style.display = 'block';
-      } else {
-        document.getElementById('thankyou').style.display = 'block';
-      }
-
-      // 送信 (URLエンコード形式)
-      fetch(CONFIG.APPS_SCRIPT_WEBAPP_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams(dataObj)
-      })
-      .then(res => res.json())
-      .then(result => {
-        console.log('送信成功:', result);
-        if (!result.success) {
-          alert('エラーが発生しました: ' + result.error);
-        }
-      })
-      .catch(err => {
-        console.error('送信エラー:', err);
-        alert('送信中に問題が発生しました。もう一度お試しください。');
       });
     }
-  });
-
-  // コメントコピー機能 (グローバルスコープからアクセスできるようwindowに追加)
-  window.copyComment = function() {
-    const commentElement = document.getElementById('comment-to-copy');
-    commentElement.select();
     
-    // 現代的なクリップボードAPIを使用し、正しい値をコピー
-    navigator.clipboard.writeText(commentElement.value)
-      .then(() => {
+    navItems.forEach(item => {
+      item.addEventListener('click', function() {
+        const targetSection = this.getAttribute('data-section');
+        const targetElements = document.querySelectorAll('[data-section="' + targetSection + '"]');
+        
+        if (targetElements.length > 0) {
+          targetElements[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(() => {
+            navItems.forEach(navItem => navItem.classList.remove('active'));
+            this.classList.add('active');
+          }, 100);
+        }
+      });
+    });
+    
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(updateNavigation, 100);
+    });
+    
+    updateNavigation();
+  }
+
+  // 星評価 UI の管理
+  function initStarRating() {
+    const stars = document.querySelectorAll('.star');
+    const ratingScore = document.getElementById('ratingScore');
+    const scoreValue = document.getElementById('scoreValue');
+    const lowRatingWarning = document.getElementById('lowRatingWarning');
+    let selectedRating = 0;
+    
+    stars.forEach(star => {
+      star.addEventListener('mouseover', function() {
+        const value = parseInt(star.getAttribute('data-value'));
+        highlightStars(value);
+      });
+    });
+    
+    document.getElementById('starsContainer').addEventListener('mouseout', function() {
+      highlightStars(selectedRating);
+    });
+
+    document.getElementById('lowRatingWarning').style.display = 'none';
+    
+    stars.forEach(star => {
+      star.addEventListener('click', function() {
+        const value = parseInt(star.getAttribute('data-value'));
+        selectRating(value);
+        star.classList.add('pulse');
+        setTimeout(() => star.classList.remove('pulse'), 300);
+      });
+    });
+    
+    function highlightStars(count) {
+      stars.forEach(star => {
+        const starValue = parseInt(star.getAttribute('data-value'));
+        star.classList.toggle('active', starValue <= count);
+      });
+    }
+    
+    function showLowRatingWarning() {
+      lowRatingWarning.classList.add('visible');
+      setTimeout(() => lowRatingWarning.classList.remove('visible'), 3000);
+    }
+    
+    function selectRating(value) {
+      selectedRating = value;
+      highlightStars(value);
+      document.getElementById('star' + value).checked = true;
+      scoreValue.textContent = value;
+      ratingScore.classList.add('visible');
+      lowRatingWarning.classList.remove('visible');
+      document.getElementById('question2').classList.add('completed');
+      
+      // エラー状態の解除
+      document.getElementById('question2').classList.remove('error');
+      document.getElementById('rating-validation').classList.remove('visible');
+      document.getElementById('global-validation').classList.remove('visible');
+    }
+  }
+
+  // 各質問の「回答済み」チェック
+  function initFormNavigation() {
+    const questions = document.querySelectorAll('.question');
+    
+    questions.forEach(question => {
+      const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+      inputs.forEach(input => {
+        input.addEventListener('change', () => {
+          question.classList.add('completed');
+          
+          // エラー状態解除
+          question.classList.remove('error');
+          const validationMsg = question.querySelector('.validation-message');
+          if (validationMsg) validationMsg.classList.remove('visible');
+          document.getElementById('global-validation').classList.remove('visible');
+        });
+      });
+      
+      const textareas = question.querySelectorAll('textarea');
+      textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+          if (this.value.trim().length > 0) {
+            question.classList.add('completed');
+          } else {
+            question.classList.remove('completed');
+          }
+        });
+      });
+    });
+  }
+});
+
+// コメントコピー機能 (グローバルスコープからアクセスできるようwindowに追加)
+window.copyComment = function() {
+  const commentElement = document.getElementById('comment-to-copy');
+  commentElement.select();
+  
+  // 現代的なクリップボードAPIを使用し、正しい値をコピー
+  navigator.clipboard.writeText(commentElement.value)
+    .then(() => {
+      const copyButton = document.getElementById('copy-button');
+      const originalText = copyButton.textContent;
+      copyButton.textContent = 'コピーしました！';
+      copyButton.style.backgroundColor = 'var(--secondary-color)';
+      
+      setTimeout(() => {
+        copyButton.textContent = originalText;
+        copyButton.style.backgroundColor = 'white';
+      }, 2000);
+    })
+    .catch(err => {
+      // エラー処理を追加
+      console.error('コピーエラー:', err);
+      
+      // 古いAPIをフォールバックとして使用
+      try {
+        document.execCommand('copy');
         const copyButton = document.getElementById('copy-button');
-        const originalText = copyButton.textContent;
         copyButton.textContent = 'コピーしました！';
         copyButton.style.backgroundColor = 'var(--secondary-color)';
         
         setTimeout(() => {
-          copyButton.textContent = originalText;
+          copyButton.textContent = 'コメントをコピー';
           copyButton.style.backgroundColor = 'white';
         }, 2000);
-      })
-      .catch(err => {
-        // エラー処理を追加
-        console.error('コピーエラー:', err);
-        
-        // 古いAPIをフォールバックとして使用
-        try {
-          document.execCommand('copy');
-          const copyButton = document.getElementById('copy-button');
-          copyButton.textContent = 'コピーしました！';
-          copyButton.style.backgroundColor = 'var(--secondary-color)';
-          
-          setTimeout(() => {
-            copyButton.textContent = 'コメントをコピー';
-            copyButton.style.backgroundColor = 'white';
-          }, 2000);
-        } catch (fallbackErr) {
-          alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
-        }
-      });
-  };
-  
-  // Googleマップへリダイレクト (グローバルスコープからアクセスできるようwindowに追加)
-  window.redirectToGoogleMaps = function() {
-    // オプショナルチェーニングを使わないバージョン
-    const storeElement = document.querySelector('input[name="store"]:checked');
-    // グローバル変数のselectedStoreを使用
-    const storeToUse = selectedStore || (storeElement ? storeElement.value : 'QUARTER');
-    const url = storeReviewUrls[storeToUse] || storeReviewUrls['QUARTER'];
-    window.open(url, '_blank');
-  };
+      } catch (fallbackErr) {
+        alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
+      }
+    });
+};
 
-  // -----------------------------
-  // ページ読み込み完了時に警告を非表示 (念のため)
-  // -----------------------------
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      const warnings = document.querySelectorAll('.apps-script-warning, div[role="alert"], .script-application-auth');
-      warnings.forEach(el => {
-        if (el) el.style.display = 'none';
-      });
-    }, 100);
-  });
+// Googleマップへリダイレクト (グローバルスコープからアクセスできるようwindowに追加)
+window.redirectToGoogleMaps = function() {
+  // グローバル変数のスコープ問題対策
+  const selectedStore = document.querySelector('input[name="store"]:checked')?.value || 'QUARTER';
+  const url = CONFIG.STORE_REVIEW_URLS[selectedStore] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
+  window.open(url, '_blank');
+};
+
+// ページ読み込み完了時に警告を非表示 (念のため)
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const warnings = document.querySelectorAll('.apps-script-warning, div[role="alert"], .script-application-auth');
+    warnings.forEach(el => {
+      if (el) el.style.display = 'none';
+    });
+  }, 100);
+});
 </script>
 </body>
 </html>
