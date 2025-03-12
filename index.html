@@ -804,6 +804,7 @@
 </div>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // グローバル変数として宣言し、スコープを正しく保持
     let selectedStore = '';
     const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
 
@@ -1008,7 +1009,8 @@
 
       // 評価 & 店舗など取得
       const rating = parseInt(dataObj.rating);
-      selectedStore = dataObj.store || '';
+      // グローバルのselectedStoreに値を設定
+      selectedStore = dataObj.store || 'QUARTER';
 
       // 口コミ用コメント(星4以上時)
       let userComments = '';
@@ -1051,35 +1053,56 @@
         alert('送信中に問題が発生しました。もう一度お試しください。');
       });
     }
+    
+    // コメントコピー機能 (グローバルスコープからアクセスできるようwindowに追加)
+    window.copyComment = function() {
+      const commentElement = document.getElementById('comment-to-copy');
+      commentElement.select();
+      
+      // 現代的なクリップボードAPIを使用し、正しい値をコピー
+      navigator.clipboard.writeText(commentElement.value)
+        .then(() => {
+          const copyButton = document.getElementById('copy-button');
+          const originalText = copyButton.textContent;
+          copyButton.textContent = 'コピーしました！';
+          copyButton.style.backgroundColor = 'var(--secondary-color)';
+          
+          setTimeout(() => {
+            copyButton.textContent = originalText;
+            copyButton.style.backgroundColor = 'white';
+          }, 2000);
+        })
+        .catch(err => {
+          // エラー処理を追加
+          console.error('コピーエラー:', err);
+          
+          // 古いAPIをフォールバックとして使用
+          try {
+            document.execCommand('copy');
+            const copyButton = document.getElementById('copy-button');
+            copyButton.textContent = 'コピーしました！';
+            copyButton.style.backgroundColor = 'var(--secondary-color)';
+            
+            setTimeout(() => {
+              copyButton.textContent = 'コメントをコピー';
+              copyButton.style.backgroundColor = 'white';
+            }, 2000);
+          } catch (fallbackErr) {
+            alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
+          }
+        });
+    };
+    
+    // Googleマップへリダイレクト (グローバルスコープからアクセスできるようwindowに追加)
+    window.redirectToGoogleMaps = function() {
+      // オプショナルチェーニングを使わないバージョン
+      const storeElement = document.querySelector('input[name="store"]:checked');
+      // グローバル変数のselectedStoreを使用
+      const storeToUse = selectedStore || (storeElement ? storeElement.value : 'QUARTER');
+      const url = storeReviewUrls[storeToUse] || storeReviewUrls['QUARTER'];
+      window.open(url, '_blank');
+    };
   });
-
-  // -----------------------------
-  // コメントコピー機能
-  // -----------------------------
-  function copyComment() {
-    const commentElement = document.getElementById('comment-to-copy');
-    commentElement.select();
-    document.execCommand('copy');
-    
-    const copyButton = document.getElementById('copy-button');
-    const originalText = copyButton.textContent;
-    copyButton.textContent = 'コピーしました！';
-    copyButton.style.backgroundColor = var('--secondary-color');
-    
-    setTimeout(() => {
-      copyButton.textContent = originalText;
-      copyButton.style.backgroundColor = 'white';
-    }, 2000);
-  }
-
-  // -----------------------------
-  // Googleマップへリダイレクト
-  // -----------------------------
-  function redirectToGoogleMaps() {
-    const selectedStore = document.querySelector('input[name="store"]:checked')?.value || 'QUARTER';
-    const url = CONFIG.STORE_REVIEW_URLS[selectedStore] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
-    window.open(url, '_blank');
-  }
 
   // -----------------------------
   // ページ読み込み完了時に警告を非表示 (念のため)
@@ -1092,7 +1115,7 @@
       });
     }, 100);
   });
-  </script>
+</script>
 </body>
 </html>
   
