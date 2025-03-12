@@ -7,6 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
   <!-- Apps Script WebアプリのURL（/exec で終わる本番URL） -->
   <script>
+    // グローバル変数
+var selectedStore = '';
+var storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
     const CONFIG = {
       APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
       STORE_REVIEW_URLS: {
@@ -259,8 +262,13 @@
       color: var(--accent-color);
     }
     .star-rating-hidden {
-      display: none;
+position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;    
     }
+    
     .rating-score {
       font-size: 16px;
       font-weight: 500;
@@ -580,7 +588,7 @@
 </div>
 
 <!-- アンケートフォーム -->
-<form id="surveyForm">
+<form id="surveyForm" novalidate>
   <!-- 必須質問：ご来店店舗 -->
   <div class="question required current" id="question1" data-section="store">
     <h3>Q1. 本日はどちらの店舗をご利用いただきましたか？</h3>
