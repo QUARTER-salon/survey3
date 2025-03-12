@@ -199,8 +199,14 @@
     }
     .options input[type="radio"],
     .options input[type="checkbox"] {
-      display: none;
-    }
+      opacity: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
     .options label:hover {
       background-color: var(--background-color);
       transform: translateX(3px);
@@ -866,6 +872,38 @@
 </div>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+  console.log('フォーム初期化');
+  
+  // 送信ボタンに直接リスナーを追加（確実に動作させるため）
+  document.querySelector('.submit-button').addEventListener('click', function(e) {
+    console.log('送信ボタンクリック');
+    // フォームのバリデーションを手動で確認
+    const storeSelected = document.querySelector('input[name="store"]:checked');
+    const ratingSelected = document.querySelector('input[name="rating"]:checked');
+    
+    if (!storeSelected || !ratingSelected) {
+      e.preventDefault(); // 送信を防止
+      console.log('バリデーションエラー');
+      
+      // エラーメッセージを表示
+      if (!storeSelected) {
+        document.getElementById('question1').classList.add('error');
+        document.getElementById('store-validation').classList.add('visible');
+      }
+      if (!ratingSelected) {
+        document.getElementById('question2').classList.add('error');
+        document.getElementById('rating-validation').classList.add('visible');
+      }
+      
+      document.getElementById('global-validation').classList.add('visible');
+      // 最初のエラー項目にスクロール
+      document.querySelector('.question.error').scrollIntoView({behavior: 'smooth'});
+      return false;
+    }
+  });
+  
+  // 残りのコードはそのまま...
+  document.addEventListener('DOMContentLoaded', function() {
     // グローバル変数として宣言し、スコープを正しく保持
     let selectedStore = '';
     const storeReviewUrls = CONFIG.STORE_REVIEW_URLS;
@@ -994,7 +1032,7 @@
         setTimeout(() => lowRatingWarning.classList.remove('visible'), 3000);
       }
       
-      function selectRating(value) {
+function selectRating(value) {
   selectedRating = value;
   highlightStars(value);
   document.getElementById('star' + value).checked = true;
@@ -1003,6 +1041,7 @@
   lowRatingWarning.classList.remove('visible');
   document.getElementById('question2').classList.add('completed');
   
+  // 以下を追加
   // エラー状態の解除
   document.getElementById('question2').classList.remove('error');
   document.getElementById('rating-validation').classList.remove('visible');
@@ -1047,17 +1086,15 @@ function initFormNavigation() {
     // フォーム送信処理
     // -----------------------------
 function handleSubmit(event) {
-  event.preventDefault();
-  const form = event.target;
-  const formData = new FormData(form);
-
-  // バリデーションチェック
+event.preventDefault();
+  
+  // バリデーションチェック（ここから追加）
   const storeSelected = formData.get('store');
   const ratingSelected = formData.get('rating');
   
   let hasErrors = false;
   
-  // すべてのバリデーションメッセージとエラー状態をリセット
+  // バリデーションメッセージをリセット
   document.querySelectorAll('.validation-message').forEach(msg => {
     msg.classList.remove('visible');
   });
@@ -1079,7 +1116,7 @@ function handleSubmit(event) {
     hasErrors = true;
   }
   
-  // エラーがある場合はグローバルメッセージを表示
+  // エラーがあればスクロールして処理を中断
   if (hasErrors) {
     document.getElementById('global-validation').classList.add('visible');
     
@@ -1095,6 +1132,9 @@ function handleSubmit(event) {
     
     return; // フォーム送信を停止
   }
+  // バリデーションチェック（ここまで追加）
+  
+  // 複数チェックボックス対策...（元のコード）
 
   // 以下、元のコード続行
   // 複数チェックボックス対策: 同じキーは配列にまとめる
