@@ -1225,10 +1225,12 @@ window.copyComment = function() {
           var originalText = copyButton.textContent;
           copyButton.textContent = 'コピーしました！';
           copyButton.style.backgroundColor = 'var(--secondary-color)';
+          copyButton.style.color = 'white'; // Added white text color
           
           setTimeout(function() {
             copyButton.textContent = originalText;
             copyButton.style.backgroundColor = 'white';
+            copyButton.style.color = ''; // Reset to default text color
           }, 2000);
         })
         .catch(function(err) {
@@ -1251,17 +1253,18 @@ window.copyComment = function() {
       
       copyButton.textContent = 'コピーしました！';
       copyButton.style.backgroundColor = 'var(--secondary-color)';
+      copyButton.style.color = 'white'; // Added white text color
       
       setTimeout(function() {
         copyButton.textContent = 'コメントをコピー';
         copyButton.style.backgroundColor = 'white';
+        copyButton.style.color = ''; // Reset to default text color
       }, 2000);
     } catch (fallbackErr) {
       alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
     }
   }
 };
-
 // Googleマップへリダイレクト
 window.redirectToGoogleMaps = function() {
   try {
