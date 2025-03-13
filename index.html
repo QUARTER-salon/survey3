@@ -17,198 +17,673 @@
       'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
       'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
     }
+  };
+  </script>
+  <style>
+    /* -------------------------------
+       リセット + 全体スタイル
+       ------------------------------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    :root {
+      --primary-color: #C39000; /* リッチゴールド */
+      --primary-light: rgba(195, 144, 0, 0.08);
+      --secondary-color: #9F8C55; /* マットゴールド */
+      --accent-color: #D0A900; /* ゴールド */
+      --danger-color: #EA4335;
+      --background-color: #F9F6F0; /* 淡いベージュ */
+      --text-color: #333333; /* 文字色 */
+      --border-color: #E6D8B3; /* シャンパンベージュ */
+      --gray-100: #f8f9fa;
+      --gray-200: #f1f3f4;
+      --gray-300: #e0e0e0;
+      --gray-400: #bdc1c6;
+      --gray-700: #5f6368;
+      --gray-900: #333333;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius-sm: 0px; /* 角を四角に */
+      --radius-md: 0px;
+      --radius-lg: 0px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --heading-font: 'Playfair Display', serif;
+      --body-font: 'Noto Sans JP', sans-serif;
+      --container-side-padding: 8%; /* コンテナの左右余白 */
+    }
+    body {
+      font-family: var(--body-font);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding-bottom: 100px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: var(--spacing-md) var(--container-side-padding); /* 左右の余白を追加 */
+      background-color: white;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+    }
 
-  // 星評価 UI の管理
-  function initStarRating() {
-    var stars = document.querySelectorAll('.star');
-    var ratingScore = document.getElementById('ratingScore');
-    var scoreValue = document.getElementById('scoreValue');
-    var lowRatingWarning = document.getElementById('lowRatingWarning');
-    var selectedRating = 0;
+    /* -------------------------------
+       ヘッダー
+       ------------------------------- */
+    header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-lg);
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .text-logo {
+      font-family: var(--heading-font);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-color);
+      letter-spacing: 3px;
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* -------------------------------
+       固定ナビゲーションバー
+       ------------------------------- */
+    .nav-container {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 90%;
+      background-color: white;
+      padding: 0;
+      margin: 0 auto var(--spacing-lg);
+      max-width: 600px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .progress-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0;
+      background-color: white;
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
+    }
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      padding: 15px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-color);
+      transition: color 0.3s ease;
+      letter-spacing: 0.5px;
+    }
+    .nav-item.active .nav-text {
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+    .nav-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background-color: var(--primary-color);
+      transition: width 0.3s ease;
+    }
+    .nav-item.active .nav-indicator {
+      width: 60%;
+    }
+
+    /* -------------------------------
+       質問カード
+       ------------------------------- */
+    .question {
+      margin-bottom: var(--spacing-xl);
+      background-color: white;
+      padding: var(--spacing-lg);
+      border-radius: 0;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-top: 1px solid var(--border-color);
+      border-left: 1px solid var(--border-color);
+      position: relative;
+      width: 100%;
+    }
+    .question.current {
+      border-left: 3px solid var(--primary-color);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .question.completed {
+      border-left: 3px solid var(--secondary-color);
+    }
+    h3 {
+      font-family: var(--body-font);
+      font-size: 16px;
+      margin-bottom: var(--spacing-md);
+      font-weight: 500;
+      color: var(--text-color);
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(230, 216, 179, 0.5);
+    }
+
+    /* -------------------------------
+       ラジオボタン & チェックボックス
+       ------------------------------- */
+    .options label {
+      display: block;
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      position: relative;
+      overflow: hidden;
+      border-left: 3px solid transparent;
+      width: 95%;
+    }
+    .options input[type="radio"],
+    .options input[type="checkbox"] {
+      opacity: 0;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .options label:hover {
+      background-color: var(--background-color);
+      transform: translateX(3px);
+      box-shadow: var(--shadow-sm);
+    }
+    .options input[type="radio"]:checked + label,
+    .options input[type="checkbox"]:checked + label {
+      background-color: rgba(230, 216, 179, 0.1);
+      border-color: var(--border-color);
+      border-left: 3px solid var(--primary-color);
+      box-shadow: var(--shadow-sm);
+      font-weight: 500;
+      transform: translateX(5px);
+    }
+    .options input[type="radio"]:checked + label::after,
+    .options input[type="checkbox"]:checked + label::after {
+      content: "✓";
+      position: absolute;
+      right: var(--spacing-md);
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+
+    /* -------------------------------
+       星評価
+       ------------------------------- */
+    .star-rating-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--spacing-xl) 0;
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .stars-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--spacing-md);
+    }
+    .star {
+      font-size: 42px;
+      cursor: pointer;
+      color: var(--gray-300);
+      transition: all 0.2s ease;
+      user-select: none;
+      padding: 0 var(--spacing-sm);
+      transform-origin: center;
+    }
+    .star:hover {
+      transform: scale(1.1);
+    }
+    .star.active {
+      color: var(--accent-color);
+    }
+    .star-rating-hidden {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;    
+    }
     
-    stars.forEach(function(star) {
-      star.addEventListener('mouseover', function() {
-        var value = parseInt(star.getAttribute('data-value'));
-        highlightStars(value);
-      });
+    .rating-score {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-color);
+      margin: var(--spacing-sm) 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-align: center;
+    }
+    .rating-score.visible {
+      opacity: 1;
+    }
+    .low-rating-warning {
+      width: 90%;
+      max-width: 400px;
+      margin: var(--spacing-md) auto 0;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background-color: #fef7e0;
+      border-left: 3px solid var(--accent-color);
+      color: var(--text-color);
+      font-size: 14px;
+      display: none;
+      border-radius: 0;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .low-rating-warning.visible {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .star.pulse {
+      animation: pulse 0.3s ease;
+    }
+
+    /* -------------------------------
+       テキストエリア
+       ------------------------------- */
+    textarea {
+      width: 95%;
+      padding: var(--spacing-md);
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      resize: vertical;
+      font-family: var(--body-font);
+      font-size: 15px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      margin: 0 auto;
+      display: block;
+    }
+    textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(195, 144, 0, 0.1);
+      outline: none;
+    }
+
+    /* -------------------------------
+       送信ボタン
+       ------------------------------- */
+    .submit-container {
+      text-align: center;
+      margin-top: var(--spacing-xl);
+      position: relative;
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .submit-button {
+      background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
+      color: white;
+      border: none;
+      padding: 12px 40px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(195, 144, 0, 0.2);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .submit-button:hover {
+      background: linear-gradient(135deg, #D0A900 0%, #B98600 100%);
+      box-shadow: 0 5px 15px rgba(195, 144, 0, 0.3);
+      transform: translateY(-2px);
+    }
+    .submit-button:active {
+      transform: translateY(0);
+    }
+
+    /* -------------------------------
+       装飾とヘルパー
+       ------------------------------- */
+    .required h3::after {
+      content: " *";
+      color: var(--danger-color);
+    }
+    .optional-note {
+      text-align: center;
+      margin: var(--spacing-xl) 0;
+      color: var(--text-color);
+      font-size: 14px;
+      background-color: var(--background-color);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: 0;
+      border-left: 3px solid var(--secondary-color);
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hidden {
+      display: none;
+    }
+
+    /* -------------------------------
+       サンクスページ & 口コミ誘導
+       ------------------------------- */
+    #thankyou, #review-redirect {
+      text-align: center;
+      padding: var(--spacing-xl) var(--spacing-md);
+      background-color: white;
+      border-radius: 0;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+      margin-top: var(--spacing-xl);
+      border-top: 1px solid var(--border-color);
+      border-left: 3px solid var(--primary-color);
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #thankyou h2, #review-redirect h2 {
+      font-family: var(--heading-font);
+      margin-bottom: var(--spacing-md);
+      font-size: 24px;
+      color: var(--text-color);
+      letter-spacing: 1px;
+    }
+    #review-redirect p {
+      margin-bottom: var(--spacing-md);
+      color: var(--text-color);
+    }
+
+    /* -------------------------------
+       コピーボタン
+       ------------------------------- */
+    .copy-container {
+      margin: var(--spacing-xl) 0;
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #comment-to-copy {
+      width: 95%;
+      height: 100px;
+      margin-bottom: var(--spacing-md);
+      padding: var(--spacing-md);
+      background-color: var(--background-color);
+      border-radius: 0;
+      border: 1px solid var(--border-color);
+    }
+    .action-button {
+      border: 1px solid var(--border-color);
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+      margin: 0 var(--spacing-xs) var(--spacing-md);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #copy-button {
+      background-color: white;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+    }
+    #redirect-button {
+      background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
+      color: white;
+      border: none;
+    }
+    .action-button:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    /* -------------------------------
+       レスポンシブ対応
+       ------------------------------- */
+    @media (max-width: 480px) {
+      :root {
+        --container-side-padding: 5%;
+      }
+      .container {
+        padding: var(--spacing-sm) var(--container-side-padding);
+      }
+      .question {
+        padding: var(--spacing-md);
+      }
+      h3 {
+        font-size: 15px;
+      }
+      .options label {
+        font-size: 14px;
+        width: 100%;
+      }
+      .submit-button,
+      .action-button {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+      }
+      .star {
+        font-size: 36px;
+        padding: 0 var(--spacing-xs);
+      }
+      .nav-text {
+        font-size: 12px;
+      }
+      .nav-item {
+        padding: 8px 0;
+      }
+    }
+
+    /* -------------------------------
+       バリデーションエラー用スタイル
+       ------------------------------- */
+    .validation-message {
+      display: none;
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: 14px;
+      border-left: 3px solid var(--accent-color);
+      background-color: rgba(195, 144, 0, 0.05);
+      color: var(--text-color);
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(-10px);
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .validation-message.visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      animation: fadeInMessage 0.5s ease forwards;
+    }
+
+    .question.error {
+      border-left: 3px solid var(--accent-color);
+    }
+
+    .question.error h3 {
+      color: var(--accent-color);
+    }
+
+    /* フラッシュ効果アニメーション */
+    @keyframes fadeInMessage {
+      0% { opacity: 0; transform: translateY(-10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* スクロールアニメーション */
+    @keyframes gentleHighlight {
+      0% { background-color: rgba(208, 169, 0, 0); }
+      50% { background-color: rgba(208, 169, 0, 0.08); }
+      100% { background-color: rgba(208, 169, 0, 0); }
+    }
+
+    .question.highlight {
+      animation: gentleHighlight 1.5s ease;
+    }
+
+    /* -------------------------------
+       Google Apps Script 警告を非表示
+       ------------------------------- */
+    .apps-script-warning,
+    div[role="alert"],
+    .script-application-auth-container,
+    .script-application-auth {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    body, html {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+    #sandboxFrame {
+      margin-top: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img 
+    class="text-logo" 
+    src="./images/quarter-logo.png"
+    alt="QUARTERロゴ" 
+    style="max-width: 200px; height: auto;">
+      </header>
+
+<!-- 固定ナビゲーションバー -->
+<div class="nav-container">
+  <div class="progress-nav">
+    <div class="nav-item active" data-section="store">
+      <span class="nav-text">店舗</span>
+      <div class="nav-indicator"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('フォーム初期化開始');
+  
+  // CONFIGをここで参照（初期化後）
+  try {
+    var storeReviewUrls = typeof CONFIG !== 'undefined' ? CONFIG.STORE_REVIEW_URLS : {};
+    console.log('CONFIG読み込み成功');
+  } catch (e) {
+    console.error('CONFIG読み込みエラー:', e);
+    var storeReviewUrls = {}; // フォールバック
+  }
+  
+  // グローバル変数
+  var selectedStore = '';
+  
+  // 初期化
+  initNavigation();
+  initStarRating();
+  initFormNavigation();
+
+  // 送信ボタンのイベント処理
+  var submitButton = document.querySelector('.submit-button');
+  if (submitButton) {
+    console.log('送信ボタン検出');
+    submitButton.addEventListener('click', validateAndSubmit);
+    submitButton.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      validateAndSubmit(e);
+    });
+  } else {
+    console.error('送信ボタンが見つかりません');
+  }
+
+  // バリデーションと送信処理
+  function validateAndSubmit(e) {
+    if (e) e.preventDefault();
+    console.log('送信処理開始');
+    
+    var form = document.getElementById('surveyForm');
+    var formData = new FormData(form);
+    
+    // バリデーションチェック
+    var storeSelected = document.querySelector('input[name="store"]:checked');
+    var ratingSelected = document.querySelector('input[name="rating"]:checked');
+    
+    var hasErrors = false;
+    
+    // エラー状態をリセット
+    document.querySelectorAll('.validation-message').forEach(function(msg) {
+      msg.classList.remove('visible');
+    });
+    document.querySelectorAll('.question.error').forEach(function(q) {
+      q.classList.remove('error');
     });
     
-    document.getElementById('starsContainer').addEventListener('mouseout', function() {
-      highlightStars(selectedRating);
-    });
-
-    document.getElementById('lowRatingWarning').style.display = 'none';
+    // 店舗選択のバリデーション
+    if (!storeSelected) {
+      document.getElementById('question1').classList.add('error');
+      document.getElementById('store-validation').classList.add('visible');
+      hasErrors = true;
+    }
     
-    stars.forEach(function(star) {
-      star.addEventListener('click', function() {
-        var value = parseInt(star.getAttribute('data-value'));
-        selectRating(value);
-        star.classList.add('pulse');
+    // 評価選択のバリデーション
+    if (!ratingSelected) {
+      document.getElementById('question2').classList.add('error');
+      document.getElementById('rating-validation').classList.add('visible');
+      hasErrors = true;
+    }
+    
+    // エラーがある場合の処理
+    if (hasErrors) {
+      document.getElementById('global-validation').classList.add('visible');
+      
+      // 最初のエラーまでスクロール
+      var firstError = document.querySelector('.question.error');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.classList.add('highlight');
         setTimeout(function() {
-          star.classList.remove('pulse');
-        }, 300);
-      });
-    });
-    
-    function highlightStars(count) {
-      stars.forEach(function(star) {
-        var starValue = parseInt(star.getAttribute('data-value'));
-        if (starValue <= count) {
-          star.classList.add('active');
-        } else {
-          star.classList.remove('active');
-        }
-      });
-    }
-    
-    function showLowRatingWarning() {
-      lowRatingWarning.classList.add('visible');
-      setTimeout(function() {
-        lowRatingWarning.classList.remove('visible');
-      }, 3000);
-    }
-    
-    function selectRating(value) {
-      selectedRating = value;
-      highlightStars(value);
-      var radioBtn = document.getElementById('star' + value);
-      if (radioBtn) radioBtn.checked = true;
+          firstError.classList.remove('highlight');
+        }, 1500);
+      }
       
-      scoreValue.textContent = value;
-      ratingScore.classList.add('visible');
-      lowRatingWarning.classList.remove('visible');
-      document.getElementById('question2').classList.add('completed');
-      
-      // エラー状態の解除
-      document.getElementById('question2').classList.remove('error');
-      var ratingValidation = document.getElementById('rating-validation');
-      if (ratingValidation) ratingValidation.classList.remove('visible');
-      
-      var globalValidation = document.getElementById('global-validation');
-      if (globalValidation) globalValidation.classList.remove('visible');
+      return false; // 送信を停止
     }
-  }
-
-  // 各質問の「回答済み」チェック
-  function initFormNavigation() {
-    var questions = document.querySelectorAll('.question');
-    
-    questions.forEach(function(question) {
-      var inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
-      inputs.forEach(function(input) {
-        input.addEventListener('change', function() {
-          question.classList.add('completed');
-          
-          // エラー状態解除
-          question.classList.remove('error');
-          var validationMsg = question.querySelector('.validation-message');
-          if (validationMsg) validationMsg.classList.remove('visible');
-          
-          var globalValidation = document.getElementById('global-validation');
-          if (globalValidation) globalValidation.classList.remove('visible');
-        });
-      });
-      
-      var textareas = question.querySelectorAll('textarea');
-      textareas.forEach(function(textarea) {
-        textarea.addEventListener('input', function() {
-          if (this.value.trim().length > 0) {
-            question.classList.add('completed');
-          } else {
-            question.classList.remove('completed');
-          }
-        });
-      });
-    });
-  }
-});
-
-// グローバル関数は後で定義（参照エラー防止）
-window.copyComment = function() {
-  var commentElement = document.getElementById('comment-to-copy');
-  if (!commentElement) return;
-  
-  commentElement.select();
-  
-  try {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(commentElement.value)
-        .then(function() {
-          var copyButton = document.getElementById('copy-button');
-          if (!copyButton) return;
-          
-          var originalText = copyButton.textContent;
-          copyButton.textContent = 'コピーしました！';
-          copyButton.style.backgroundColor = 'var(--secondary-color)';
-          copyButton.style.color = 'white'; // Added white text color
-          
-          setTimeout(function() {
-            copyButton.textContent = originalText;
-            copyButton.style.backgroundColor = 'white';
-            copyButton.style.color = ''; // Reset to default text color
-          }, 2000);
-        })
-        .catch(function(err) {
-          console.error('コピーエラー:', err);
-          fallbackCopy();
-        });
-    } else {
-      fallbackCopy();
-    }
-  } catch (e) {
-    console.error('クリップボードエラー:', e);
-    fallbackCopy();
-  }
-  
-  function fallbackCopy() {
-    try {
-      document.execCommand('copy');
-      var copyButton = document.getElementById('copy-button');
-      if (!copyButton) return;
-      
-      copyButton.textContent = 'コピーしました！';
-      copyButton.style.backgroundColor = 'var(--secondary-color)';
-      copyButton.style.color = 'white'; // Added white text color
-      
-      setTimeout(function() {
-        copyButton.textContent = 'コメントをコピー';
-        copyButton.style.backgroundColor = 'white';
-        copyButton.style.color = ''; // Reset to default text color
-      }, 2000);
-    } catch (fallbackErr) {
-      alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
-    }
-  }
-};
-// Googleマップへリダイレクト
-window.redirectToGoogleMaps = function() {
-  try {
-    var selectedStore = document.querySelector('input[name="store"]:checked');
-    var storeName = selectedStore ? selectedStore.value : 'QUARTER';
-    
-    if (typeof CONFIG !== 'undefined' && CONFIG.STORE_REVIEW_URLS) {
-      var url = CONFIG.STORE_REVIEW_URLS[storeName] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
-      window.open(url, '_blank');
-    } else {
-      console.error('STORE_REVIEW_URLS が定義されていません');
-    }
-  } catch (e) {
-    console.error('リダイレクトエラー:', e);
-  }
-};
-
-// ページ読み込み完了時の処理
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    var warnings = document.querySelectorAll('.apps-script-warning, div[role="alert"], .script-application-auth');
-    warnings.forEach(function(el) {
-      if (el) el.style.display = 'none';
-    });
-  }, 100);
-});
-</script>
-</body>
-</html>
 
     // 以下、送信処理
     var dataObj = {};
@@ -349,585 +824,293 @@ window.addEventListener('load', function() {
     
     updateNavigation();
   }
-  };
-  </script>
-  <style>
-    /* -------------------------------
-       リセット + 全体スタイル
-       ------------------------------- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    :root {
-      --primary-color: #C39000; /* リッチゴールド */
-      --primary-light: rgba(195, 144, 0, 0.08);
-      --secondary-color: #9F8C55; /* マットゴールド */
-      --accent-color: #D0A900; /* ゴールド */
-      --danger-color: #EA4335;
-      --background-color: #F9F6F0; /* 淡いベージュ */
-      --text-color: #333333; /* 文字色 */
-      --border-color: #E6D8B3; /* シャンパンベージュ */
-      --gray-100: #f8f9fa;
-      --gray-200: #f1f3f4;
-      --gray-300: #e0e0e0;
-      --gray-400: #bdc1c6;
-      --gray-700: #5f6368;
-      --gray-900: #333333;
-      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
-      --radius-sm: 0px; /* 角を四角に */
-      --radius-md: 0px;
-      --radius-lg: 0px;
-      --spacing-xs: 4px;
-      --spacing-sm: 8px;
-      --spacing-md: 16px;
-      --spacing-lg: 24px;
-      --spacing-xl: 32px;
-      --heading-font: 'Playfair Display', serif;
-      --body-font: 'Noto Sans JP', sans-serif;
-      --container-side-padding: 8%; /* 追加：コンテナの左右余白 */
-    }
-    body {
-      font-family: var(--body-font);
-      background-color: var(--background-color);
-      color: var(--text-color);
-      line-height: 1.6;
-      padding-bottom: 100px;
-    }
-    .container {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: var(--spacing-md) var(--container-side-padding); /* 左右の余白を追加 */
-      background-color: white;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
-    }
 
-    /* -------------------------------
-       ヘッダー
-       ------------------------------- */
-    header {
-      text-align: center;
-      margin-bottom: var(--spacing-xl);
-      padding-top: var(--spacing-lg);
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: var(--spacing-lg);
-      width: 90%; /* 追加：ヘッダーに内側余白を設定 */
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .text-logo {
-      font-family: var(--heading-font);
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--text-color);
-      letter-spacing: 3px;
-      margin-bottom: var(--spacing-md);
-    }
+  // 星評価 UI の管理
+  function initStarRating() {
+    var stars = document.querySelectorAll('.star');
+    var ratingScore = document.getElementById('ratingScore');
+    var scoreValue = document.getElementById('scoreValue');
+    var lowRatingWarning = document.getElementById('lowRatingWarning');
+    var selectedRating = 0;
+    
+    stars.forEach(function(star) {
+      star.addEventListener('mouseover', function() {
+        var value = parseInt(star.getAttribute('data-value'));
+        highlightStars(value);
+      });
+    });
+    
+    document.getElementById('starsContainer').addEventListener('mouseout', function() {
+      highlightStars(selectedRating);
+    });
 
-    /* -------------------------------
-       固定ナビゲーションバー
-       ------------------------------- */
-    .nav-container {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      width: 90%; /* 修正：ナビゲーションバーの幅を調整 */
-      background-color: white;
-      padding: 0;
-      margin: 0 auto var(--spacing-lg);
-      max-width: 600px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .progress-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      padding: 0;
-      background-color: white;
-      border-radius: 0;
-      box-shadow: none;
-      border: none;
-    }
-    .nav-item {
-      flex: 1;
-      text-align: center;
-      position: relative;
-      padding: 15px 0;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .nav-text {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-color);
-      transition: color 0.3s ease;
-      letter-spacing: 0.5px;
-    }
-    .nav-item.active .nav-text {
-      color: var(--primary-color);
-      font-weight: 500;
-    }
-    .nav-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 2px;
-      background-color: var(--primary-color);
-      transition: width 0.3s ease;
-    }
-    .nav-item.active .nav-indicator {
-      width: 60%;
-    }
-
-    /* -------------------------------
-       質問カード
-       ------------------------------- */
-    .question {
-      margin-bottom: var(--spacing-xl);
-      background-color: white;
-      padding: var(--spacing-lg);
-      border-radius: 0;
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border-top: 1px solid var(--border-color);
-      border-left: 1px solid var(--border-color);
-      position: relative;
-      width: 100%; /* 質問カードの幅を100%に */
-    }
-    .question.current {
-      border-left: 3px solid var(--primary-color);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-    }
-    .question.completed {
-      border-left: 3px solid var(--secondary-color);
-    }
-    h3 {
-      font-family: var(--body-font);
-      font-size: 16px;
-      margin-bottom: var(--spacing-md);
-      font-weight: 500;
-      color: var(--text-color);
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(230, 216, 179, 0.5);
-    }
-
-    /* -------------------------------
-       ラジオボタン & チェックボックス
-       ------------------------------- */
-    .options label {
-      display: block;
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-sm);
-      background-color: white;
-      border: 1px solid var(--border-color);
-      border-radius: 0;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 15px;
-      position: relative;
-      overflow: hidden;
-      border-left: 3px solid transparent;
-      width: 95%; /* 追加：選択肢ボックスの幅を調整 */
-    }
-    .options input[type="radio"],
-    .options input[type="checkbox"] {
-      opacity: 0;
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-    }
-    .options label:hover {
-      background-color: var(--background-color);
-      transform: translateX(3px);
-      box-shadow: var(--shadow-sm);
-    }
-    .options input[type="radio"]:checked + label,
-    .options input[type="checkbox"]:checked + label {
-      background-color: rgba(230, 216, 179, 0.1);
-      border-color: var(--border-color);
-      border-left: 3px solid var(--primary-color);
-      box-shadow: var(--shadow-sm);
-      font-weight: 500;
-      transform: translateX(5px);
-    }
-    .options input[type="radio"]:checked + label::after,
-    .options input[type="checkbox"]:checked + label::after {
-      content: "✓";
-      position: absolute;
-      right: var(--spacing-md);
-      color: var(--primary-color);
-      font-weight: bold;
-    }
-
-    /* -------------------------------
-       星評価
-       ------------------------------- */
-    .star-rating-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: var(--spacing-xl) 0;
-      width: 90%; /* 追加：星評価コンテナの幅を調整 */
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .stars-row {
-      display: flex;
-      justify-content: center;
-      margin-bottom: var(--spacing-md);
-    }
-    .star {
-      font-size: 42px;
-      cursor: pointer;
-      color: var(--gray-300);
-      transition: all 0.2s ease;
-      user-select: none;
-      padding: 0 var(--spacing-sm);
-      transform-origin: center;
-    }
-    .star:hover {
-      transform: scale(1.1);
-    }
-    .star.active {
-      color: var(--accent-color);
-    }
-    .star-rating-hidden {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;    
+    document.getElementById('lowRatingWarning').style.display = 'none';
+    
+    stars.forEach(function(star) {
+      star.addEventListener('click', function() {
+        var value = parseInt(star.getAttribute('data-value'));
+        selectRating(value);
+        star.classList.add('pulse');
+        setTimeout(function() {
+          star.classList.remove('pulse');
+        }, 300);
+      });
+    });
+    
+    function highlightStars(count) {
+      stars.forEach(function(star) {
+        var starValue = parseInt(star.getAttribute('data-value'));
+        if (starValue <= count) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
     }
     
-    .rating-score {
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--text-color);
-      margin: var(--spacing-sm) 0;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      text-align: center;
+    function showLowRatingWarning() {
+      lowRatingWarning.classList.add('visible');
+      setTimeout(function() {
+        lowRatingWarning.classList.remove('visible');
+      }, 3000);
     }
-    .rating-score.visible {
-      opacity: 1;
+    
+    function selectRating(value) {
+      selectedRating = value;
+      highlightStars(value);
+      var radioBtn = document.getElementById('star' + value);
+      if (radioBtn) radioBtn.checked = true;
+      
+      scoreValue.textContent = value;
+      ratingScore.classList.add('visible');
+      lowRatingWarning.classList.remove('visible');
+      document.getElementById('question2').classList.add('completed');
+      
+      // エラー状態の解除
+      document.getElementById('question2').classList.remove('error');
+      var ratingValidation = document.getElementById('rating-validation');
+      if (ratingValidation) ratingValidation.classList.remove('visible');
+      
+      var globalValidation = document.getElementById('global-validation');
+      if (globalValidation) globalValidation.classList.remove('visible');
     }
-    .low-rating-warning {
-      width: 90%; /* 追加：低評価警告の幅を調整 */
-      max-width: 400px;
-      margin: var(--spacing-md) auto 0;
-      padding: var(--spacing-sm) var(--spacing-md);
-      background-color: #fef7e0;
-      border-left: 3px solid var(--accent-color);
-      color: var(--text-color);
-      font-size: 14px;
-      display: none;
-      border-radius: 0;
-      text-align: center;
-      animation: fadeIn 0.3s ease;
-    }
-    .low-rating-warning.visible {
-      display: block;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-    .star.pulse {
-      animation: pulse 0.3s ease;
-    }
+  }
 
-    /* -------------------------------
-       テキストエリア
-       ------------------------------- */
-    textarea {
-      width: 95%; /* 追加：テキストエリアの幅を調整 */
-      padding: var(--spacing-md);
-      border: 1px solid var(--border-color);
-      border-radius: 0;
-      resize: vertical;
-      font-family: var(--body-font);
-      font-size: 15px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      margin: 0 auto;
-      display: block;
-    }
-    textarea:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(195, 144, 0, 0.1);
-      outline: none;
-    }
+  // 各質問の「回答済み」チェック
+  function initFormNavigation() {
+    var questions = document.querySelectorAll('.question');
+    
+    questions.forEach(function(question) {
+      var inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+      inputs.forEach(function(input) {
+        input.addEventListener('change', function() {
+          question.classList.add('completed');
+          
+          // エラー状態解除
+          question.classList.remove('error');
+          var validationMsg = question.querySelector('.validation-message');
+          if (validationMsg) validationMsg.classList.remove('visible');
+          
+          var globalValidation = document.getElementById('global-validation');
+          if (globalValidation) globalValidation.classList.remove('visible');
+        });
+      });
+      
+      var textareas = question.querySelectorAll('textarea');
+      textareas.forEach(function(textarea) {
+        textarea.addEventListener('input', function() {
+          if (this.value.trim().length > 0) {
+            question.classList.add('completed');
+          } else {
+            question.classList.remove('completed');
+          }
+        });
+      });
+    });
+  }
+});
 
-    /* -------------------------------
-       送信ボタン
-       ------------------------------- */
-    .submit-container {
-      text-align: center;
-      margin-top: var(--spacing-xl);
-      position: relative;
-      width: 90%; /* 追加：送信ボタンコンテナの幅を調整 */
-      margin-left: auto;
-      margin-right: auto;
+// グローバル関数は後で定義（参照エラー防止）
+window.copyComment = function() {
+  var commentElement = document.getElementById('comment-to-copy');
+  if (!commentElement) return;
+  
+  commentElement.select();
+  
+  try {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(commentElement.value)
+        .then(function() {
+          var copyButton = document.getElementById('copy-button');
+          if (!copyButton) return;
+          
+          var originalText = copyButton.textContent;
+          copyButton.textContent = 'コピーしました！';
+          copyButton.style.backgroundColor = 'var(--secondary-color)';
+          copyButton.style.color = 'white';
+          
+          setTimeout(function() {
+            copyButton.textContent = originalText;
+            copyButton.style.backgroundColor = 'white';
+            copyButton.style.color = '';
+          }, 2000);
+        })
+        .catch(function(err) {
+          console.error('コピーエラー:', err);
+          fallbackCopy();
+        });
+    } else {
+      fallbackCopy();
     }
-    .submit-button {
-      background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
-      color: white;
-      border: none;
-      padding: 12px 40px;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 2px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 3px 10px rgba(195, 144, 0, 0.2);
-      letter-spacing: 1px;
-      text-transform: uppercase;
+  } catch (e) {
+    console.error('クリップボードエラー:', e);
+    fallbackCopy();
+  }
+  
+  function fallbackCopy() {
+    try {
+      document.execCommand('copy');
+      var copyButton = document.getElementById('copy-button');
+      if (!copyButton) return;
+      
+      copyButton.textContent = 'コピーしました！';
+      copyButton.style.backgroundColor = 'var(--secondary-color)';
+      copyButton.style.color = 'white';
+      
+      setTimeout(function() {
+        copyButton.textContent = 'コメントをコピー';
+        copyButton.style.backgroundColor = 'white';
+        copyButton.style.color = '';
+      }, 2000);
+    } catch (fallbackErr) {
+      alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
     }
-    .submit-button:hover {
-      background: linear-gradient(135deg, #D0A900 0%, #B98600 100%);
-      box-shadow: 0 5px 15px rgba(195, 144, 0, 0.3);
-      transform: translateY(-2px);
-    }
-    .submit-button:active {
-      transform: translateY(0);
-    }
+  }
+};
 
-    /* -------------------------------
-       装飾とヘルパー
-       ------------------------------- */
-    .required h3::after {
-      content: " *";
-      color: var(--danger-color);
+// Googleマップへリダイレクト
+window.redirectToGoogleMaps = function() {
+  try {
+    var selectedStore = document.querySelector('input[name="store"]:checked');
+    var storeName = selectedStore ? selectedStore.value : 'QUARTER';
+    
+    if (typeof CONFIG !== 'undefined' && CONFIG.STORE_REVIEW_URLS) {
+      var url = CONFIG.STORE_REVIEW_URLS[storeName] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
+      window.open(url, '_blank');
+    } else {
+      console.error('STORE_REVIEW_URLS が定義されていません');
     }
-    .optional-note {
-      text-align: center;
-      margin: var(--spacing-xl) 0;
-      color: var(--text-color);
-      font-size: 14px;
-      background-color: var(--background-color);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: 0;
-      border-left: 3px solid var(--secondary-color);
-      width: 90%; /* 追加：任意項目ノートの幅を調整 */
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hidden {
-      display: none;
-    }
+  } catch (e) {
+    console.error('リダイレクトエラー:', e);
+  }
+};
 
-    /* -------------------------------
-       サンクスページ & 口コミ誘導
-       ------------------------------- */
-    #thankyou, #review-redirect {
-      text-align: center;
-      padding: var(--spacing-xl) var(--spacing-md);
-      background-color: white;
-      border-radius: 0;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-      margin-top: var(--spacing-xl);
-      border-top: 1px solid var(--border-color);
-      border-left: 3px solid var(--primary-color);
-      width: 90%; /* 追加：サンクスページコンテナの幅を調整 */
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #thankyou h2, #review-redirect h2 {
-      font-family: var(--heading-font);
-      margin-bottom: var(--spacing-md);
-      font-size: 24px;
-      color: var(--text-color);
-      letter-spacing: 1px;
-    }
-    #review-redirect p {
-      margin-bottom: var(--spacing-md);
-      color: var(--text-color);
-    }
-
-    /* -------------------------------
-       コピーボタン
-       ------------------------------- */
-    .copy-container {
-      margin: var(--spacing-xl) 0;
-      width: 90%; /* 追加：コピーコンテナの幅を調整 */
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #comment-to-copy {
-      width: 95%; /* 追加：コメントコピーエリアの幅を調整 */
-      height: 100px;
-      margin-bottom: var(--spacing-md);
-      padding: var(--spacing-md);
-      background-color: var(--background-color);
-      border-radius: 0;
-      border: 1px solid var(--border-color);
-    }
-    .action-button {
-      border: 1px solid var(--border-color);
-      padding: var(--spacing-md) var(--spacing-lg);
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 2px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow-sm);
-      margin: 0 var(--spacing-xs) var(--spacing-md);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    #copy-button {
-      background-color: white;
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
-    }
-    #redirect-button {
-      background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
-      color: white;
-      border: none;
-    }
-    .action-button:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-
-    /* -------------------------------
-       レスポンシブ対応
-       ------------------------------- */
-    @media (max-width: 480px) {
-      :root {
-        --container-side-padding: 5%; /* モバイル用の余白を調整 */
-      }
-      .container {
-        padding: var(--spacing-sm) var(--container-side-padding);
-      }
-      .question {
-        padding: var(--spacing-md);
-      }
-      h3 {
-        font-size: 15px;
-      }
-      .options label {
-        font-size: 14px;
-        width: 100%; /* モバイル時は選択肢を画面いっぱいに */
-      }
-      .submit-button,
-      .action-button {
-        width: 100%;
-        margin-bottom: var(--spacing-sm);
-      }
-      .star {
-        font-size: 36px;
-        padding: 0 var(--spacing-xs);
-      }
-      .nav-text {
-        font-size: 12px;
-      }
-      .nav-item {
-        padding: 8px 0;
-      }
-    }
-
-    /* -------------------------------
-       Google Apps Script 警告を非表示
-       ------------------------------- */
-    .apps-script-warning,
-    div[role="alert"],
-    .script-application-auth-container,
-    .script-application-auth {
-      display: none !important;
-      visibility: hidden !important;
-      height: 0 !important;
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-    body, html {
-      margin-top: 0 !important;
-      padding-top: 0 !important;
-    }
-    #sandboxFrame {
-      margin-top: 0 !important;
-    }
-
-    /* バリデーションエラー用スタイル */
-.validation-message {
-  display: none;
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: 14px;
-  border-left: 3px solid var(--accent-color);
-  background-color: rgba(195, 144, 0, 0.05);
-  color: var(--text-color);
-  opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transform: translateY(-10px);
-  width: 90%; /* 追加：バリデーションメッセージの幅を調整 */
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.validation-message.visible {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-  animation: fadeInMessage 0.5s ease forwards;
-}
-
-.question.error {
-  border-left: 3px solid var(--accent-color);
-}
-
-.question.error h3 {
-  color: var(--accent-color);
-}
-
-/* フラッシュ効果アニメーション */
-@keyframes fadeInMessage {
-  0% { opacity: 0; transform: translateY(-10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-/* スクロールアニメーション */
-@keyframes gentleHighlight {
-  0% { background-color: rgba(208, 169, 0, 0); }
-  50% { background-color: rgba(208, 169, 0, 0.08); }
-  100% { background-color: rgba(208, 169, 0, 0); }
-}
-
-.question.highlight {
-  animation: gentleHighlight 1.5s ease;
-}
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <img 
-    class="text-logo" 
-    src="./images/quarter-logo.png"
-    alt="QUARTERロゴ" 
-    style="max-width: 200px; height: auto;">
-      </header>
-
-<!-- 固定ナビゲーションバー -->
-<div class="nav-container">
-  <div class="progress-nav">
-    <div class="nav-item active" data-section="store">
-      <span class="nav-text">店舗</span>
-      <div class="nav-indicator"></div>
+// ページ読み込み完了時の処理
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var warnings = document.querySelectorAll('.apps-script-warning, div[role="alert"], .script-application-auth');
+    warnings.forEach(function(el) {
+      if (el) el.style.display = 'none';
+    });
+  }, 100);
+});
+</script>
     </div>
+    
+    <!-- 待ち時間 -->
+    <div class="question" id="question10" data-section="service">
+      <h3>Q10. 待ち時間に関してのご感想をお聞かせください。</h3>
+      <div class="options">
+        <input type="radio" id="wait5" name="waitTime" value="非常に満足">
+        <label for="wait5">非常に満足</label><br>
+        
+        <input type="radio" id="wait4" name="waitTime" value="満足">
+        <label for="wait4">満足</label><br>
+        
+        <input type="radio" id="wait3" name="waitTime" value="普通">
+        <label for="wait3">普通</label><br>
+        
+        <input type="radio" id="wait2" name="waitTime" value="不満">
+        <label for="wait2">不満</label><br>
+        
+        <input type="radio" id="wait1" name="waitTime" value="非常に不満">
+        <label for="wait1">非常に不満</label>
+      </div>
+    </div>
+    
+    <!-- 店内清潔感 -->
+    <div class="question" id="question11" data-section="service">
+      <h3>Q11. 店内の清潔感についての印象をお選びください。</h3>
+      <div class="options">
+        <input type="radio" id="clean5" name="cleanliness" value="非常に清潔">
+        <label for="clean5">非常に清潔</label><br>
+        
+        <input type="radio" id="clean4" name="cleanliness" value="清潔">
+        <label for="clean4">清潔</label><br>
+        
+        <input type="radio" id="clean3" name="cleanliness" value="普通">
+        <label for="clean3">普通</label><br>
+        
+        <input type="radio" id="clean2" name="cleanliness" value="不清潔">
+        <label for="clean2">不清潔</label><br>
+        
+        <input type="radio" id="clean1" name="cleanliness" value="非常に不清潔">
+        <label for="clean1">非常に不清潔</label>
+      </div>
+    </div>
+    
+    <!-- 追加してほしいサービス・改善点 -->
+    <div class="question" id="question12" data-section="feedback">
+      <h3>Q12. もし何か追加してほしいサービス・改善点、またはご要望等ございましたら、自由にお書きください。（任意）</h3>
+      <textarea name="improvement" rows="3" placeholder="ご意見をご記入ください"></textarea>
+    </div>
+    
+    <!-- その他ご感想 -->
+    <div class="question" id="question13" data-section="feedback">
+      <h3>Q13. その他お気づきの点やご感想があれば、ぜひお書きください。（任意）</h3>
+      <textarea name="otherComments" rows="3" placeholder="ご感想をご記入ください"></textarea>
+    </div>
+  </div>
+
+  <div class="validation-message" id="global-validation" style="text-align: center; margin-bottom: var(--spacing-md);">
+    <span>必須項目をご入力ください</span>
+  </div>
+  
+  <!-- 送信ボタン -->
+  <div class="submit-container">
+    <button type="button" id="submitButton" class="submit-button">送信する</button>
+  </div>
+</form>
+
+<!-- 星3以下用のメッセージ -->
+<div id="thankyou" class="hidden">
+  <h2>ご回答ありがとうございました。</h2>
+  <p>貴重なご意見を参考に、より良いサービスを目指します。</p>
+</div>
+
+<!-- 星4以上用の口コミ促進メッセージ -->
+<div id="review-redirect" class="hidden">
+  <h2>星4以上ありがとうございます！</h2>
+  <p>いつも当店をご利用いただき、誠にありがとうございます。</p>
+  <p>もしよろしければ、以下のコメントをコピーして「Googleマップ」にご投稿いただけますと大変励みになります。</p>
+  <p>
+    - ボタンを押すと簡単にコピーできます<br>
+    - 投稿ページが開いたらペーストしていただくだけでOKです
+  </p>
+  
+  <div class="copy-container">
+    <textarea id="comment-to-copy" readonly></textarea>
+    <div>
+      <button id="copy-button" class="action-button" onclick="copyComment()">コメントをコピー</button>
+      <button id="redirect-button" class="action-button" onclick="redirectToGoogleMaps()">Googleマップで口コミを投稿する</button>
+    </div>
+  </div>
+  
+  <p>
+    今後とも皆様に喜んでいただけるよう、スタッフ一同さらに技術を磨いてまいります。<br>
+    どうぞよろしくお願いいたします。
+  </p>
+</div>
     <div class="nav-item" data-section="rating">
       <span class="nav-text">評価</span>
       <div class="nav-indicator"></div>
@@ -970,10 +1153,9 @@ window.addEventListener('load', function() {
     </div>
     
     <!-- エラーメッセージ -->
-  <div class="validation-message" id="store-validation">
-    <span>店舗を選択してください</span>
-  </div>
-    
+    <div class="validation-message" id="store-validation">
+      <span>店舗を選択してください</span>
+    </div>
   </div>
   
   <!-- 必須質問：総合評価（Google風星評価） -->
@@ -1009,10 +1191,9 @@ window.addEventListener('load', function() {
     </div>
 
     <!-- エラーメッセージ -->
-  <div class="validation-message" id="rating-validation">
-    <span>評価を選択してください</span>
-  </div>
-    
+    <div class="validation-message" id="rating-validation">
+      <span>評価を選択してください</span>
+    </div>
   </div>
   
   <div class="optional-questions">
@@ -1142,184 +1323,3 @@ window.addEventListener('load', function() {
         <label for="staff1">非常に悪い</label>
       </div>
     </div>
-    
-    <!-- 待ち時間 -->
-    <div class="question" id="question10" data-section="service">
-      <h3>Q10. 待ち時間に関してのご感想をお聞かせください。</h3>
-      <div class="options">
-        <input type="radio" id="wait5" name="waitTime" value="非常に満足">
-        <label for="wait5">非常に満足</label><br>
-        
-        <input type="radio" id="wait4" name="waitTime" value="満足">
-        <label for="wait4">満足</label><br>
-        
-        <input type="radio" id="wait3" name="waitTime" value="普通">
-        <label for="wait3">普通</label><br>
-        
-        <input type="radio" id="wait2" name="waitTime" value="不満">
-        <label for="wait2">不満</label><br>
-        
-        <input type="radio" id="wait1" name="waitTime" value="非常に不満">
-        <label for="wait1">非常に不満</label>
-      </div>
-    </div>
-    
-    <!-- 店内清潔感 -->
-    <div class="question" id="question11" data-section="service">
-      <h3>Q11. 店内の清潔感についての印象をお選びください。</h3>
-      <div class="options">
-        <input type="radio" id="clean5" name="cleanliness" value="非常に清潔">
-        <label for="clean5">非常に清潔</label><br>
-        
-        <input type="radio" id="clean4" name="cleanliness" value="清潔">
-        <label for="clean4">清潔</label><br>
-        
-        <input type="radio" id="clean3" name="cleanliness" value="普通">
-        <label for="clean3">普通</label><br>
-        
-        <input type="radio" id="clean2" name="cleanliness" value="不清潔">
-        <label for="clean2">不清潔</label><br>
-        
-        <input type="radio" id="clean1" name="cleanliness" value="非常に不清潔">
-        <label for="clean1">非常に不清潔</label>
-      </div>
-    </div>
-    
-    <!-- 追加してほしいサービス・改善点 -->
-    <div class="question" id="question12" data-section="feedback">
-      <h3>Q12. もし何か追加してほしいサービス・改善点、またはご要望等ございましたら、自由にお書きください。（任意）</h3>
-      <textarea name="improvement" rows="3" placeholder="ご意見をご記入ください"></textarea>
-    </div>
-    
-    <!-- その他ご感想 -->
-    <div class="question" id="question13" data-section="feedback">
-      <h3>Q13. その他お気づきの点やご感想があれば、ぜひお書きください。（任意）</h3>
-      <textarea name="otherComments" rows="3" placeholder="ご感想をご記入ください"></textarea>
-    </div>
-  </div>
-
-  <div class="validation-message" id="global-validation" style="text-align: center; margin-bottom: var(--spacing-md);">
-  <span>必須項目をご入力ください</span>
-</div>
-  
-  <!-- 送信ボタン -->
-  <div class="submit-container">
-<button type="button" id="submitButton" class="submit-button">送信する</button>
-  </div>
-</form>
-
-<!-- 星3以下用のメッセージ -->
-<div id="thankyou" class="hidden">
-  <h2>ご回答ありがとうございました。</h2>
-  <p>貴重なご意見を参考に、より良いサービスを目指します。</p>
-</div>
-
-<!-- 星4以上用の口コミ促進メッセージ -->
-<div id="review-redirect" class="hidden">
-  <h2>星4以上ありがとうございます！</h2>
-  <p>いつも当店をご利用いただき、誠にありがとうございます。</p>
-  <p>もしよろしければ、以下のコメントをコピーして「Googleマップ」にご投稿いただけますと大変励みになります。</p>
-  <p>
-    - ボタンを押すと簡単にコピーできます<br>
-    - 投稿ページが開いたらペーストしていただくだけでOKです
-  </p>
-  
-  <div class="copy-container">
-    <textarea id="comment-to-copy" readonly></textarea>
-    <div>
-      <button id="copy-button" class="action-button" onclick="copyComment()">コメントをコピー</button>
-      <button id="redirect-button" class="action-button" onclick="redirectToGoogleMaps()">Googleマップで口コミを投稿する</button>
-    </div>
-  </div>
-  
-  <p>
-    今後とも皆様に喜んでいただけるよう、スタッフ一同さらに技術を磨いてまいります。<br>
-    どうぞよろしくお願いいたします。
-  </p>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('フォーム初期化開始');
-  
-  // CONFIGをここで参照（初期化後）
-  try {
-    var storeReviewUrls = typeof CONFIG !== 'undefined' ? CONFIG.STORE_REVIEW_URLS : {};
-    console.log('CONFIG読み込み成功');
-  } catch (e) {
-    console.error('CONFIG読み込みエラー:', e);
-    var storeReviewUrls = {}; // フォールバック
-  }
-  
-  // グローバル変数
-  var selectedStore = '';
-  
-  // 初期化
-  initNavigation();
-  initStarRating();
-  initFormNavigation();
-
-  // 送信ボタンのイベント処理
-  var submitButton = document.querySelector('.submit-button');
-  if (submitButton) {
-    console.log('送信ボタン検出');
-    submitButton.addEventListener('click', validateAndSubmit);
-    submitButton.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      validateAndSubmit(e);
-    });
-  } else {
-    console.error('送信ボタンが見つかりません');
-  }
-
-  // バリデーションと送信処理
-  function validateAndSubmit(e) {
-    if (e) e.preventDefault();
-    console.log('送信処理開始');
-    
-    var form = document.getElementById('surveyForm');
-    var formData = new FormData(form);
-    
-    // バリデーションチェック
-    var storeSelected = document.querySelector('input[name="store"]:checked');
-    var ratingSelected = document.querySelector('input[name="rating"]:checked');
-    
-    var hasErrors = false;
-    
-    // エラー状態をリセット
-    document.querySelectorAll('.validation-message').forEach(function(msg) {
-      msg.classList.remove('visible');
-    });
-    document.querySelectorAll('.question.error').forEach(function(q) {
-      q.classList.remove('error');
-    });
-    
-    // 店舗選択のバリデーション
-    if (!storeSelected) {
-      document.getElementById('question1').classList.add('error');
-      document.getElementById('store-validation').classList.add('visible');
-      hasErrors = true;
-    }
-    
-    // 評価選択のバリデーション
-    if (!ratingSelected) {
-      document.getElementById('question2').classList.add('error');
-      document.getElementById('rating-validation').classList.add('visible');
-      hasErrors = true;
-    }
-    
-    // エラーがある場合の処理
-    if (hasErrors) {
-      document.getElementById('global-validation').classList.add('visible');
-      
-      // 最初のエラーまでスクロール
-      var firstError = document.querySelector('.question.error');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        firstError.classList.add('highlight');
-        setTimeout(function() {
-          firstError.classList.remove('highlight');
-        }, 1500);
-      }
-      
-      return false; // 送信を停止
-    }
