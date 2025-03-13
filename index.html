@@ -149,19 +149,23 @@
       width: 60%;
     }
 
-    /* ナビゲーション項目をもっと操作しやすくする */
+   
+  /* ナビゲーション項目をより操作しやすくする */
 .nav-item {
   cursor: pointer;
   user-select: none;
-  -webkit-tap-highlight-color: rgba(195, 144, 0, 0.1); /* タップ時の視覚的フィードバック */
-  position: relative;
-  z-index: 10; /* 確実に最前面に出す */
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  min-height: 44px; /* タップしやすい最小サイズ */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-/* タップ/ホバー時の視覚的フィードバック */
-.nav-item:hover .nav-text,
-.nav-item:active .nav-text {
-  color: var(--primary-color);
+/* タップ/クリック時の明確なフィードバック */
+.nav-item:active {
+  background-color: rgba(195, 144, 0, 0.1);
+}
 }
 
     /* -------------------------------
@@ -1335,6 +1339,55 @@ window.addEventListener('load', function() {
     });
   }, 100);
 });
+
+// 既存の関数とは独立した新しいナビゲーション機能
+document.addEventListener('DOMContentLoaded', function() {
+  // DOM完全読み込み後に実行
+  setupNavigation();
+});
+
+function setupNavigation() {
+  console.log('新しいナビゲーション機能を初期化します');
+  
+  // すべてのナビゲーション項目を選択
+  var navItems = document.querySelectorAll('.nav-item');
+  
+  // 各ナビ項目にクリックイベントを追加
+  navItems.forEach(function(item) {
+    item.onclick = function(e) {
+      e.stopPropagation(); // イベントの伝播を停止
+      
+      // クリックされたセクション名を取得
+      var section = this.getAttribute('data-section');
+      console.log('セクション「' + section + '」がクリックされました');
+      
+      // 該当セクションの最初の質問を見つける
+      var questions = document.querySelectorAll('.question[data-section="' + section + '"]');
+      if (questions.length > 0) {
+        // 最初の質問までスクロール
+        questions[0].scrollIntoView({behavior: 'smooth'});
+        console.log(section + 'セクションの最初の質問までスクロールします');
+        
+        // アクティブ状態を更新
+        navItems.forEach(function(nav) {
+          nav.classList.remove('active');
+        });
+        this.classList.add('active');
+      }
+    };
+  });
+  
+  // タッチデバイス対応
+  navItems.forEach(function(item) {
+    item.ontouchend = function(e) {
+      e.preventDefault();
+      // クリックイベントと同じ処理を実行
+      this.click();
+    };
+  });
+  
+  console.log('ナビゲーション機能の初期化が完了しました');
+}
 </script>
 </body>
 </html>
