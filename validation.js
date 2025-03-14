@@ -208,8 +208,8 @@ function showResult(rating) {
    const headingElement = document.querySelector('#review-redirect h2');
    if (headingElement) {
      headingElement.textContent = rating === 5 ? 
-       '高評価ありがとうございます！' : 
-       '高評価ありがとうございます！';
+       '星5の高評価ありがとうございます！' : 
+       '星4の高評価ありがとうございます！';
    }
    
    const reviewRedirect = document.getElementById('review-redirect');
