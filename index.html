@@ -2,435 +2,1197 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QUARTERアンケート</title>
   
   <!-- Googleフォントの読み込み -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
   
-  <!-- スタイルシートの読み込み - 正しいパスを明示的に確認 -->
-  <link rel="stylesheet" href="./css/styles.css">
-  <link rel="stylesheet" href="./css/responsive.css">
+  <!-- ここにインラインCSSを追加 -->
+  <style>
+    /* リセットと変数定義 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* カラーパレット */
+  --primary-color: #C39000;
+  --primary-light: rgba(195, 144, 0, 0.08);
+  --secondary-color: #9F8C55;
+  --accent-color: #D0A900;
+  --danger-color: #EA4335;
+  --background-color: #F9F6F0;
+  --text-color: #333333;
+  --border-color: #E6D8B3;
   
-  <!-- 設定ファイル - このスクリプトは他のスクリプトの前に読み込む必要がある -->
-  <script>
-  // CONFIG オブジェクトを直接定義して読み込みエラーを防止
-  window.CONFIG = {
-    // Apps Script WebアプリのURL
-    APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
-    
-    // 各店舗のGoogleマップレビューURL
-    STORE_REVIEW_URLS: {
-      'QUARTER': 'https://g.page/r/CfiWzYV0WLCdEBE/review',
-      'QUARTER RESORT': 'https://g.page/r/CUpu9_cAhdaGEBE/review',
-      'QUARTER SEASONS': 'https://g.page/r/CWAu_dLl0DJmEBE/review',
-      'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
-      'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
-    }
-  };
-  </script>
+  /* グレースケール */
+  --gray-100: #f8f9fa;
+  --gray-200: #f1f3f4;
+  --gray-300: #e0e0e0;
+  --gray-400: #bdc1c6;
+  --gray-700: #5f6368;
+  --gray-900: #333333;
+  
+  /* シャドウ */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  /* スペーシング */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* フォント */
+  --heading-font: 'Playfair Display', serif;
+  --body-font: 'Noto Sans JP', sans-serif;
+}
+
+/* 全体レイアウト */
+body {
+  font-family: var(--body-font);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  padding-bottom: 100px;
+}
+
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--spacing-xl);
+  background-color: white;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.07);
+}
+
+/* ヘッダー */
+header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--spacing-lg);
+}
+
+.text-logo {
+  max-width: 200px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+/* ナビゲーションバー */
+.nav-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background-color: white;
+  padding: 0;
+  margin: 0 auto var(--spacing-lg);
+  max-width: 600px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.progress-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  background-color: white;
+}
+
+.nav-item {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  padding: 15px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-color);
+  transition: color 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.nav-item.active .nav-text {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.nav-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav-item.active .nav-indicator {
+  width: 60%;
+}
+
+/* 質問カード */
+.question {
+  margin: 0 5% var(--spacing-xl);
+  background-color: white;
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-top: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  position: relative;
+}
+
+.question.current {
+  border-left: 3px solid var(--primary-color);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.question.completed {
+  border-left: 3px solid var(--secondary-color);
+}
+
+.options {
+  margin: 0 5%;
+}
+
+h3 {
+  font-family: var(--body-font);
+  font-size: 16px;
+  margin-bottom: var(--spacing-md);
+  font-weight: 500;
+  color: var(--text-color);
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(230, 216, 179, 0.5);
+}
+
+/* フォーム要素（ラジオ、チェックボックス） */
+.options label {
+  display: block;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  background-color: white;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+  border-left: 3px solid transparent;
+}
+
+.options input[type="radio"],
+.options input[type="checkbox"] {
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.options label:hover {
+  background-color: var(--background-color);
+  transform: translateX(3px);
+  box-shadow: var(--shadow-sm);
+}
+
+.options input[type="radio"]:checked + label,
+.options input[type="checkbox"]:checked + label {
+  background-color: rgba(230, 216, 179, 0.1);
+  border-color: var(--border-color);
+  border-left: 3px solid var(--primary-color);
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+  transform: translateX(5px);
+}
+
+.options input[type="radio"]:checked + label::after,
+.options input[type="checkbox"]:checked + label::after {
+  content: "✓";
+  position: absolute;
+  right: var(--spacing-md);
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+/* 星評価 */
+.star-rating-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--spacing-xl) 0;
+}
+
+.stars-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.star {
+  font-size: 42px;
+  cursor: pointer;
+  color: var(--gray-300);
+  transition: all 0.2s ease;
+  user-select: none;
+  padding: 0 var(--spacing-sm);
+  transform-origin: center;
+}
+
+.star:hover {
+  transform: scale(1.1);
+}
+
+.star.active {
+  color: var(--accent-color);
+}
+
+.star-rating-hidden {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.rating-score {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin: var(--spacing-sm) 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  text-align: center;
+}
+
+.rating-score.visible {
+  opacity: 1;
+}
+
+/* テキストエリア */
+textarea {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  resize: vertical;
+  font-family: var(--body-font);
+  font-size: 15px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(195, 144, 0, 0.1);
+  outline: none;
+}
+
+/* 送信ボタン */
+.submit-container {
+  text-align: center;
+  margin: var(--spacing-xl) 6% 0;
+  position: relative;
+}
+
+.submit-button {
+  background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
+  color: white;
+  border: none;
+  padding: 12px 40px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(195, 144, 0, 0.2);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.submit-button:hover {
+  background: linear-gradient(135deg, #D0A900 0%, #B98600 100%);
+  box-shadow: 0 5px 15px rgba(195, 144, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* サンクスページと口コミリダイレクト */
+#thankyou, 
+#review-redirect {
+  max-width: 680px;
+  width: 92%;
+  margin: var(--spacing-xl) auto 0;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background-color: white;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  border-top: 1px solid var(--border-color);
+  border-left: 3px solid var(--primary-color);
+  text-align: center;
+  display: none;
+}
+
+#thankyou.hidden, 
+#review-redirect.hidden {
+  display: none;
+}
+
+#thankyou h2, 
+#review-redirect h2 {
+  font-family: var(--heading-font);
+  margin-bottom: var(--spacing-md);
+  font-size: 24px;
+  color: var(--text-color);
+  letter-spacing: 1px;
+}
+
+/* コピーコンテナ */
+.copy-container {
+  width: 100%;
+  margin: var(--spacing-lg) 0;
+}
+
+#comment-to-copy {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-bottom: var(--spacing-md);
+  height: 100px;
+}
+
+.copy-container div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.action-button {
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  margin: 0 var(--spacing-xs) var(--spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#copy-button {
+  background-color: white;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+#redirect-button {
+  background: linear-gradient(135deg, #D0A900 0%, #C39000 100%);
+  color: white;
+  border: none;
+}
+
+/* バリデーション */
+.validation-message {
+  display: none;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 14px;
+  border-left: 3px solid var(--danger-color);
+  background-color: rgba(234, 67, 53, 0.05);
+  color: var(--danger-color);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(-10px);
+}
+
+.validation-message.visible {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.question.error {
+  border-left: 3px solid var(--danger-color);
+}
+
+.question.error h3 {
+  color: var(--danger-color);
+}
+
+/* その他のユーティリティ */
+.required h3::after {
+  content: " *";
+  color: var(--danger-color);
+}
+
+.optional-note {
+  text-align: center;
+  margin: var(--spacing-xl) 0;
+  color: var(--text-color);
+  font-size: 14px;
+  background-color: var(--background-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-left: 3px solid var(--secondary-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-sm);
+  }
+  
+  .question {
+    padding: var(--spacing-md);
+  }
+  
+  .star {
+    font-size: 36px;
+  }
+  
+  .nav-text {
+    font-size: 12px;
+  }
+}
+  </style>
 </head>
 <body>
   <div class="container">
-    <!-- ヘッダー -->
-    <header>
-      <img class="text-logo" 
-           src="./images/quarter-logo.png" 
-           alt="QUARTERロゴ" 
-           style="max-width: 200px; height: auto;">
-    </header>
+  <!-- ヘッダー -->
+  <header>
+    <img class="text-logo" src="./images/quarter-logo.png" alt="QUARTERロゴ" style="max-width: 200px; height: auto;">
+  </header>
 
-    <!-- ナビゲーションバー -->
-    <div class="nav-container">
-      <div class="progress-nav">
-        <div class="nav-item active" data-section="store">
-          <span class="nav-text">店舗</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="rating">
-          <span class="nav-text">評価</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="info">
-          <span class="nav-text">情報</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="service">
-          <span class="nav-text">サービス</span>
-          <div class="nav-indicator"></div>
-        </div>
-        <div class="nav-item" data-section="feedback">
-          <span class="nav-text">感想</span>
-          <div class="nav-indicator"></div>
-        </div>
+  <!-- ナビゲーションバー -->
+  <div class="nav-container">
+    <div class="progress-nav">
+      <div class="nav-item active" data-section="store">
+        <span class="nav-text">店舗</span>
+        <div class="nav-indicator"></div>
       </div>
-    </div>
-
-    <!-- アンケートフォーム -->
-    <form id="surveyForm" novalidate>
-      <!-- 店舗選択（必須） -->
-      <div class="question required current" id="question1" data-section="store">
-        <h3>Q1. 本日はどちらの店舗をご利用いただきましたか？</h3>
-        <div class="options">
-          <input type="radio" id="quarter" name="store" value="QUARTER" required>
-          <label for="quarter">QUARTER</label>
-          
-          <input type="radio" id="quarter-resort" name="store" value="QUARTER RESORT">
-          <label for="quarter-resort">QUARTER RESORT</label>
-          
-          <input type="radio" id="quarter-seasons" name="store" value="QUARTER SEASONS">
-          <label for="quarter-seasons">QUARTER SEASONS</label>
-          
-          <input type="radio" id="link" name="store" value="LINK">
-          <label for="link">LINK</label>
-          
-          <input type="radio" id="il" name="store" value="iL">
-          <label for="il">iL</label>
-        </div>
-        
-        <div class="validation-message" id="store-validation">
-          <span>店舗を選択してください</span>
-        </div>
+      <div class="nav-item" data-section="rating">
+        <span class="nav-text">評価</span>
+        <div class="nav-indicator"></div>
       </div>
-      
-      <!-- 総合評価（必須） -->
-      <div class="question required" id="question2" data-section="rating">
-        <h3>Q2. 本日の総合満足度を星1～5でお聞かせください。</h3>
-        
-        <div class="star-rating-container">
-          <div class="stars-row" id="starsContainer">
-            <span class="star" data-value="1">★</span>
-            <span class="star" data-value="2">★</span>
-            <span class="star" data-value="3">★</span>
-            <span class="star" data-value="4">★</span>
-            <span class="star" data-value="5">★</span>
-          </div>
-          
-          <div class="rating-score" id="ratingScore">
-            評価: <span id="scoreValue">0</span>/5
-          </div>
-        </div>
-        
-        <div class="star-rating-hidden">
-          <input type="radio" id="star5" name="rating" value="5" required>
-          <input type="radio" id="star4" name="rating" value="4">
-          <input type="radio" id="star3" name="rating" value="3">
-          <input type="radio" id="star2" name="rating" value="2">
-          <input type="radio" id="star1" name="rating" value="1">
-        </div>
-
-        <div class="validation-message" id="rating-validation">
-          <span>評価を選択してください</span>
-        </div>
+      <div class="nav-item" data-section="info">
+        <span class="nav-text">情報</span>
+        <div class="nav-indicator"></div>
       </div>
-      
-      <!-- 任意質問セクション -->
-      <div class="optional-questions">
-        <p class="optional-note">
-          以下の質問は任意です。ご回答いただけると大変参考になります。
-        </p>
-        
-        <!-- お名前（任意） -->
-        <div class="question" id="question3" data-section="info">
-          <h3>Q3. お名前をお聞かせください。（任意）</h3>
-          <textarea name="name" rows="1" placeholder="お名前またはニックネームをご記入ください"></textarea>
-        </div>
-        
-        <!-- 来店タイプ（任意） -->
-        <div class="question" id="question4" data-section="info">
-          <h3>Q4. 当店へのご来店は…（任意）</h3>
-          <div class="options">
-            <input type="radio" id="first-time" name="visitType" value="初めて（新規）">
-            <label for="first-time">初めて（新規）</label>
-            
-            <input type="radio" id="repeat" name="visitType" value="2回目以降（常連）">
-            <label for="repeat">2回目以降（リピーター）</label>
-          </div>
-        </div>
-        
-        <!-- 性別（任意） -->
-        <div class="question" id="question5" data-section="info">
-          <h3>Q5. お客様の性別をお聞かせください。（任意）</h3>
-          <div class="options">
-            <input type="radio" id="male" name="gender" value="男性">
-            <label for="male">男性</label>
-            
-            <input type="radio" id="female" name="gender" value="女性">
-            <label for="female">女性</label>
-            
-            <input type="radio" id="other" name="gender" value="その他">
-            <label for="other">その他</label>
-          </div>
-        </div>
-        
-        <!-- 年齢（任意） -->
-        <div class="question" id="question6" data-section="info">
-          <h3>Q6. お客様のご年齢をお聞かせください。（任意）</h3>
-          <div class="options">
-            <input type="radio" id="age10s" name="age" value="10代">
-            <label for="age10s">10代</label>
-            
-            <input type="radio" id="age20s" name="age" value="20代">
-            <label for="age20s">20代</label>
-            
-            <input type="radio" id="age30s" name="age" value="30代">
-            <label for="age30s">30代</label>
-            
-            <input type="radio" id="age40s" name="age" value="40代">
-            <label for="age40s">40代</label>
-            
-            <input type="radio" id="age50s" name="age" value="50代">
-            <label for="age50s">50代</label>
-            
-            <input type="radio" id="age60plus" name="age" value="60代以上">
-            <label for="age60plus">60代以上</label>
-          </div>
-        </div>
-        
-        <!-- 利用サービス（複数選択可） -->
-        <div class="question" id="question7" data-section="service">
-          <h3>Q7. 本日ご利用いただいたメニューをお選びください。（複数選択可）</h3>
-           
-          <!-- 通常店舗用のメニュー（デフォルト表示） -->
-          <div class="options" id="standard-services">
-            <input type="checkbox" id="cut" name="services" value="カット">
-            <label for="cut">カット</label>
-            
-            <input type="checkbox" id="color" name="services" value="カラー">
-            <label for="color">カラー</label>
-            
-            <input type="checkbox" id="perm" name="services" value="パーマ">
-            <label for="perm">パーマ</label>
-            
-            <input type="checkbox" id="treatment" name="services" value="トリートメント">
-            <label for="treatment">トリートメント</label>
-            
-            <input type="checkbox" id="headspa" name="services" value="ヘッドスパ">
-            <label for="headspa">ヘッドスパ</label>
-            
-            <input type="checkbox" id="other-service" name="services" value="その他">
-            <label for="other-service">その他（ネイル・着付け 等）</label>
-          </div>
-          
-          <!-- iL店舗用のメニュー（初期状態では非表示） -->
-          <div class="options" id="il-services" style="display: none;">
-            <input type="checkbox" id="il-eyelash-ext" name="services" value="まつ毛エクステ">
-            <label for="il-eyelash-ext">まつ毛エクステ</label>
-            
-            <input type="checkbox" id="il-eyelash-perm" name="services" value="まつ毛パーマ">
-            <label for="il-eyelash-perm">まつ毛パーマ</label>
-            
-            <input type="checkbox" id="il-wax" name="services" value="WAXメニュー">
-            <label for="il-wax">WAXメニュー</label>
-            
-            <input type="checkbox" id="il-other" name="services" value="その他メニュー">
-            <label for="il-other">その他メニュー</label>
-          </div>
-        </div>
-        
-        <!-- サービス満足度 -->
-        <div class="question" id="question8" data-section="service">
-          <h3>Q8. 施術の技術や仕上がりに対する満足度をお聞かせください。</h3>
-          <div class="options">
-            <input type="radio" id="service5" name="serviceSatisfaction" value="非常に満足">
-            <label for="service5">非常に満足</label>
-            
-            <input type="radio" id="service4" name="serviceSatisfaction" value="満足">
-            <label for="service4">満足</label>
-            
-            <input type="radio" id="service3" name="serviceSatisfaction" value="普通">
-            <label for="service3">普通</label>
-            
-            <input type="radio" id="service2" name="serviceSatisfaction" value="不満">
-            <label for="service2">不満</label>
-            
-            <input type="radio" id="service1" name="serviceSatisfaction" value="非常に不満">
-            <label for="service1">非常に不満</label>
-          </div>
-        </div>
-        
-        <!-- スタッフ対応 -->
-        <div class="question" id="question9" data-section="service">
-          <h3>Q9. スタッフの接客対応はいかがでしたか？</h3>
-          <div class="options">
-            <input type="radio" id="staff5" name="staffResponse" value="非常に良い">
-            <label for="staff5">非常に良い</label>
-            
-            <input type="radio" id="staff4" name="staffResponse" value="良い">
-            <label for="staff4">良い</label>
-            
-            <input type="radio" id="staff3" name="staffResponse" value="普通">
-            <label for="staff3">普通</label>
-            
-            <input type="radio" id="staff2" name="staffResponse" value="悪い">
-            <label for="staff2">悪い</label>
-            
-            <input type="radio" id="staff1" name="staffResponse" value="非常に悪い">
-            <label for="staff1">非常に悪い</label>
-          </div>
-        </div>
-        
-        <!-- 待ち時間 -->
-        <div class="question" id="question10" data-section="service">
-          <h3>Q10. ご来店から施術開始までの時間についてのご感想をお聞かせください。</h3>
-          <div class="options">
-            <input type="radio" id="wait5" name="waitTime" value="非常に満足">
-            <label for="wait5">非常に満足</label>
-            
-            <input type="radio" id="wait4" name="waitTime" value="満足">
-            <label for="wait4">満足</label>
-            
-            <input type="radio" id="wait3" name="waitTime" value="普通">
-            <label for="wait3">普通</label>
-            
-            <input type="radio" id="wait2" name="waitTime" value="不満">
-            <label for="wait2">不満</label>
-            
-            <input type="radio" id="wait1" name="waitTime" value="非常に不満">
-            <label for="wait1">非常に不満</label>
-          </div>
-        </div>
-        
-        <!-- 店内清潔感 -->
-        <div class="question" id="question11" data-section="service">
-          <h3>Q11. 店内の空間や清潔感についてのご印象をお聞かせください。</h3>
-          <div class="options">
-            <input type="radio" id="clean5" name="cleanliness" value="非常に清潔">
-            <label for="clean5">非常に清潔</label>
-            
-            <input type="radio" id="clean4" name="cleanliness" value="清潔">
-            <label for="clean4">清潔</label>
-            
-            <input type="radio" id="clean3" name="cleanliness" value="普通">
-            <label for="clean3">普通</label>
-            
-            <input type="radio" id="clean2" name="cleanliness" value="不清潔">
-            <label for="clean2">不清潔</label>
-            
-            <input type="radio" id="clean1" name="cleanliness" value="非常に不清潔">
-            <label for="clean1">非常に不清潔</label>
-          </div>
-        </div>
-        
-        <!-- 改善点・要望 -->
-        <div class="question" id="question12" data-section="feedback">
-          <h3>Q12. ご要望や改善点などがございましたら、ぜひお聞かせください。（任意）</h3>
-          <textarea name="improvement" rows="3" placeholder="ご意見をご記入ください"></textarea>
-        </div>
-        
-        <!-- その他感想 -->
-        <div class="question" id="question13" data-section="feedback">
-          <h3>Q13. その他、当店での体験についてのご感想やお気づきの点をお聞かせください。（任意）</h3>
-          <textarea name="otherComments" rows="3" placeholder="ご感想をご記入ください"></textarea>
-        </div>
+      <div class="nav-item" data-section="service">
+        <span class="nav-text">サービス</span>
+        <div class="nav-indicator"></div>
       </div>
-
-      <!-- グローバルバリデーションメッセージ -->
-      <div class="validation-message" id="global-validation" style="text-align: center; margin-bottom: var(--spacing-md);">
-        <span>必須項目をご入力ください</span>
+      <div class="nav-item" data-section="feedback">
+        <span class="nav-text">感想</span>
+        <div class="nav-indicator"></div>
       </div>
-      
-      <!-- 送信ボタンコンテナ -->
-      <div class="submit-container">
-        <button type="button" id="submitButton" class="submit-button">送信する</button>
-      </div>
-    </form>
-
-    <!-- 星3以下用のメッセージ -->
-    <div id="thankyou" class="hidden">
-      <h2>ご回答ありがとうございました。</h2>
-      <p>ご回答ありがとうございました。いただいたご意見を真摯に受け止め、サービスの向上に努めてまいります。今後ともQUARTERグループをよろしくお願いいたします。</p>
-    </div>
-
-    <!-- 星4以上用の口コミ促進メッセージ -->
-    <div id="review-redirect" class="hidden">
-      <h2>高評価をいただき、ありがとうございます。</h2>
-      <p>当店をご利用いただき、心より感謝申し上げます。</p>
-      <p>もしよろしければ、以下のコメントをコピーして「Googleマップ」にご投稿いただけますと大変励みになります。</p>
-      <p>
-        ・下のボタンでコメントをコピー<br>
-        ・投稿ページが開いたらペーストするだけです
-      </p>
-      
-      <div class="copy-container">
-        <textarea id="comment-to-copy" readonly></textarea>
-        <div>
-          <button id="copy-button" class="action-button" onclick="copyComment()">コメントをコピー</button>
-          <button id="redirect-button" class="action-button" onclick="redirectToGoogleMaps()">Googleマップで口コミを投稿する</button>
-        </div>
-      </div>
-      
-      <p>
-        今後もお客様にご満足いただけるよう、スタッフ一同技術を磨いてまいります。<br>
-        引き続きQUARTERグループをよろしくお願いいたします。
-      </p>
     </div>
   </div>
 
-  <!-- JavaScript ファイルの読み込み順序を修正 -->
-  <!-- 1. まず設定ファイルを読み込み -->
-  <script>
-    // 設定ファイルが正常に読み込まれなかった場合のフォールバック
-    if (typeof CONFIG === 'undefined') {
-      window.CONFIG = {
-        APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
-        STORE_REVIEW_URLS: {
-          'QUARTER': 'https://g.page/r/CfiWzYV0WLCdEBE/review',
-          'QUARTER RESORT': 'https://g.page/r/CUpu9_cAhdaGEBE/review',
-          'QUARTER SEASONS': 'https://g.page/r/CWAu_dLl0DJmEBE/review',
-          'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
-          'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
-        }
-      };
-    }
-  </script>
-  
-  <!-- 2. 他のスクリプトを正しい順序で読み込み -->
-  <script src="js/navigation.js"></script>
-  <script src="js/scroll-monitor.js"></script>
-  <script src="js/star-rating.js"></script>
-  <script src="js/validation.js"></script>
-  <script src="js/dynamic-services.js"></script>
-  <script src="js/main.js"></script>
+  <!-- アンケートフォーム -->
+  <form id="surveyForm" novalidate>
+    <!-- 店舗選択（必須） -->
+    <div class="question required current" id="question1" data-section="store">
+      <h3>Q1. 本日はどちらの店舗をご利用いただきましたか？</h3>
+      <div class="options">
+        <input type="radio" id="quarter" name="store" value="QUARTER" required>
+        <label for="quarter">QUARTER</label>
+        
+        <input type="radio" id="quarter-resort" name="store" value="QUARTER RESORT">
+        <label for="quarter-resort">QUARTER RESORT</label>
+        
+        <input type="radio" id="quarter-seasons" name="store" value="QUARTER SEASONS">
+        <label for="quarter-seasons">QUARTER SEASONS</label>
+        
+        <input type="radio" id="link" name="store" value="LINK">
+        <label for="link">LINK</label>
+        
+        <input type="radio" id="il" name="store" value="iL">
+        <label for="il">iL</label>
+      </div>
+      
+      <div class="validation-message" id="store-validation">
+        <span>店舗を選択してください</span>
+      </div>
+    </div>
+    
+    <!-- 総合評価（必須） -->
+    <div class="question required" id="question2" data-section="rating">
+      <h3>Q2. 本日の総合満足度を星1～5でお聞かせください。</h3>
+      
+      <div class="star-rating-container">
+        <div class="stars-row" id="starsContainer">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star" data-value="5">★</span>
+        </div>
+        
+        <div class="rating-score" id="ratingScore">
+          評価: <span id="scoreValue">0</span>/5
+        </div>
+      </div>
+      
+      <div class="star-rating-hidden">
+        <input type="radio" id="star5" name="rating" value="5" required>
+        <input type="radio" id="star4" name="rating" value="4">
+        <input type="radio" id="star3" name="rating" value="3">
+        <input type="radio" id="star2" name="rating" value="2">
+        <input type="radio" id="star1" name="rating" value="1">
+      </div>
 
-  <!-- 3. ページ読み込み完了後に全てのモジュールを明示的に初期化 -->
-  <script>
-    // DOMContentLoadedイベントが既に発生していた場合に備えて
-    // 各モジュールの初期化関数を直接呼び出す
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM読み込み完了 - 初期化開始');
+      <div class="validation-message" id="rating-validation">
+        <span>評価を選択してください</span>
+      </div>
+    </div>
+    
+    <!-- 任意質問セクション -->
+    <div class="optional-questions">
+      <p class="optional-note">
+        以下の質問は任意です。ご回答いただけると大変参考になります。
+      </p>
       
-      // 各モジュールの初期化関数が存在するか確認して呼び出す
-      if (typeof initCrossPlatformNavigation === 'function') {
-        console.log('ナビゲーション初期化');
-        initCrossPlatformNavigation();
-      }
+      <!-- お名前（任意） -->
+      <div class="question" id="question3" data-section="info">
+        <h3>Q3. お名前をお聞かせください。（任意）</h3>
+        <textarea name="name" rows="1" placeholder="お名前またはニックネームをご記入ください"></textarea>
+      </div>
       
-      if (typeof initStarRating === 'function') {
-        console.log('星評価初期化');
-        initStarRating();
-      }
+      <!-- ここに残りの質問を追加 -->
+      <!-- 来店タイプ（任意） -->
+      <div class="question" id="question4" data-section="info">
+        <h3>Q4. 当店へのご来店は…（任意）</h3>
+        <div class="options">
+          <input type="radio" id="first-time" name="visitType" value="初めて（新規）">
+          <label for="first-time">初めて（新規）</label>
+          
+          <input type="radio" id="repeat" name="visitType" value="2回目以降（常連）">
+          <label for="repeat">2回目以降（リピーター）</label>
+        </div>
+      </div>
       
-      if (typeof initFormValidation === 'function') {
-        console.log('フォーム検証初期化');
-        initFormValidation();
-      }
+      <!-- 性別（任意） -->
+      <div class="question" id="question5" data-section="info">
+        <h3>Q5. お客様の性別をお聞かせください。（任意）</h3>
+        <div class="options">
+          <input type="radio" id="male" name="gender" value="男性">
+          <label for="male">男性</label>
+          
+          <input type="radio" id="female" name="gender" value="女性">
+          <label for="female">女性</label>
+          
+          <input type="radio" id="other" name="gender" value="その他">
+          <label for="other">その他</label>
+        </div>
+      </div>
       
-      if (typeof initDynamicServices === 'function') {
-        console.log('動的サービスメニュー初期化');
-        initDynamicServices();
+      <!-- 年齢（任意） -->
+      <div class="question" id="question6" data-section="info">
+        <h3>Q6. お客様のご年齢をお聞かせください。（任意）</h3>
+        <div class="options">
+          <input type="radio" id="age10s" name="age" value="10代">
+          <label for="age10s">10代</label>
+          
+          <input type="radio" id="age20s" name="age" value="20代">
+          <label for="age20s">20代</label>
+          
+          <input type="radio" id="age30s" name="age" value="30代">
+          <label for="age30s">30代</label>
+          
+          <input type="radio" id="age40s" name="age" value="40代">
+          <label for="age40s">40代</label>
+          
+          <input type="radio" id="age50s" name="age" value="50代">
+          <label for="age50s">50代</label>
+          
+          <input type="radio" id="age60plus" name="age" value="60代以上">
+          <label for="age60plus">60代以上</label>
+        </div>
+      </div>
+      
+      <!-- 利用サービス（複数選択可） -->
+      <div class="question" id="question7" data-section="service">
+        <h3>Q7. 本日ご利用いただいたメニューをお選びください。（複数選択可）</h3>
+        
+        <!-- 通常店舗用のメニュー（デフォルト表示） -->
+        <div class="options" id="standard-services">
+          <input type="checkbox" id="cut" name="services" value="カット">
+          <label for="cut">カット</label>
+          
+          <input type="checkbox" id="color" name="services" value="カラー">
+          <label for="color">カラー</label>
+          
+          <input type="checkbox" id="perm" name="services" value="パーマ">
+          <label for="perm">パーマ</label>
+          
+          <input type="checkbox" id="treatment" name="services" value="トリートメント">
+          <label for="treatment">トリートメント</label>
+          
+          <input type="checkbox" id="headspa" name="services" value="ヘッドスパ">
+          <label for="headspa">ヘッドスパ</label>
+          
+          <input type="checkbox" id="other-service" name="services" value="その他">
+          <label for="other-service">その他（ネイル・着付け 等）</label>
+        </div>
+        
+        <!-- iL店舗用のメニュー（初期状態では非表示） -->
+        <div class="options" id="il-services" style="display: none;">
+          <input type="checkbox" id="il-eyelash-ext" name="services" value="まつ毛エクステ">
+          <label for="il-eyelash-ext">まつ毛エクステ</label>
+          
+          <input type="checkbox" id="il-eyelash-perm" name="services" value="まつ毛パーマ">
+          <label for="il-eyelash-perm">まつ毛パーマ</label>
+          
+          <input type="checkbox" id="il-wax" name="services" value="WAXメニュー">
+          <label for="il-wax">WAXメニュー</label>
+          
+          <input type="checkbox" id="il-other" name="services" value="その他メニュー">
+          <label for="il-other">その他メニュー</label>
+        </div>
+      </div>
+      
+      <!-- 改善点・要望 -->
+      <div class="question" id="question12" data-section="feedback">
+        <h3>Q12. ご要望や改善点などがございましたら、ぜひお聞かせください。（任意）</h3>
+        <textarea name="improvement" rows="3" placeholder="ご意見をご記入ください"></textarea>
+      </div>
+      
+      <!-- その他感想 -->
+      <div class="question" id="question13" data-section="feedback">
+        <h3>Q13. その他、当店での体験についてのご感想やお気づきの点をお聞かせください。（任意）</h3>
+        <textarea name="otherComments" rows="3" placeholder="ご感想をご記入ください"></textarea>
+      </div>
+    </div>
+
+    <!-- グローバルバリデーションメッセージ -->
+    <div class="validation-message" id="global-validation" style="text-align: center; margin-bottom: 16px;">
+      <span>必須項目をご入力ください</span>
+    </div>
+    
+    <!-- 送信ボタンコンテナ -->
+    <div class="submit-container">
+      <button type="button" id="submitButton" class="submit-button">送信する</button>
+    </div>
+  </form>
+
+  <!-- 星3以下用のメッセージ -->
+  <div id="thankyou" class="hidden">
+    <h2>ご回答ありがとうございました。</h2>
+    <p>ご回答ありがとうございました。いただいたご意見を真摯に受け止め、サービスの向上に努めてまいります。今後ともQUARTERグループをよろしくお願いいたします。</p>
+  </div>
+
+  <!-- 星4以上用の口コミ促進メッセージ -->
+  <div id="review-redirect" class="hidden">
+    <h2>高評価をいただき、ありがとうございます。</h2>
+    <p>当店をご利用いただき、心より感謝申し上げます。</p>
+    <p>もしよろしければ、以下のコメントをコピーして「Googleマップ」にご投稿いただけますと大変励みになります。</p>
+    <p>
+      ・下のボタンでコメントをコピー<br>
+      ・投稿ページが開いたらペーストするだけです
+    </p>
+    
+    <div class="copy-container">
+      <textarea id="comment-to-copy" readonly></textarea>
+      <div>
+        <button id="copy-button" class="action-button">コメントをコピー</button>
+        <button id="redirect-button" class="action-button">Googleマップで口コミを投稿する</button>
+      </div>
+    </div>
+    
+    <p>
+      今後もお客様にご満足いただけるよう、スタッフ一同技術を磨いてまいります。<br>
+      引き続きQUARTERグループをよろしくお願いいたします。
+    </p>
+  </div>
+</div>
+  
+  // 設定オブジェクト
+const CONFIG = {
+  // Apps Script WebアプリのURL
+  APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
+  
+  // 各店舗のGoogleマップレビューURL
+  STORE_REVIEW_URLS: {
+    'QUARTER': 'https://g.page/r/CfiWzYV0WLCdEBE/review',
+    'QUARTER RESORT': 'https://g.page/r/CUpu9_cAhdaGEBE/review',
+    'QUARTER SEASONS': 'https://g.page/r/CWAu_dLl0DJmEBE/review',
+    'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
+    'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
+  }
+};
+
+// DOM読み込み完了時の処理
+document.addEventListener('DOMContentLoaded', function() {
+  // 初期化関数を呼び出し
+  initNavigation();
+  initStarRating();
+  initDynamicServices();
+  initFormValidation();
+});
+
+// ナビゲーション機能
+function initNavigation() {
+  document.querySelectorAll('.nav-item').forEach(navItem => {
+    navItem.addEventListener('click', function() {
+      const section = this.getAttribute('data-section');
+      const targetElement = document.querySelector(`.question[data-section="${section}"]`);
+      
+      if (targetElement) {
+        // ナビアイテムのアクティブ状態を更新
+        document.querySelectorAll('.nav-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // スムーズスクロール
+        const targetPosition = targetElement.getBoundingClientRect().top;
+        const offsetPosition = targetPosition + window.pageYOffset - 80;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       }
     });
+  });
+}
+
+// スクロール監視機能（シンプル版）
+window.addEventListener('scroll', function() {
+  const scrollPosition = window.scrollY;
+  const sections = document.querySelectorAll('.question[data-section]');
+  const navItems = document.querySelectorAll('.nav-item');
+  
+  let currentSection = '';
+  
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - 100;
+    const sectionHeight = section.offsetHeight;
     
-    // 既に読み込みが完了している場合は直接実行
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      console.log('既にDOM読み込み完了 - 直接初期化');
-      
-      if (typeof initCrossPlatformNavigation === 'function') initCrossPlatformNavigation();
-      if (typeof initStarRating === 'function') initStarRating();
-      if (typeof initFormValidation === 'function') initFormValidation();
-      if (typeof initDynamicServices === 'function') initDynamicServices();
+    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+      currentSection = section.getAttribute('data-section');
     }
+  });
+  
+  if (currentSection) {
+    navItems.forEach(item => {
+      if (item.getAttribute('data-section') === currentSection) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+  }
+});
+
+// 星評価機能
+function initStarRating() {
+  const stars = document.querySelectorAll('.star');
+  const ratingScore = document.getElementById('ratingScore');
+  const scoreValue = document.getElementById('scoreValue');
+  const question2 = document.getElementById('question2');
+  
+  let selectedRating = 0;
+  
+  stars.forEach(star => {
+    // マウスオーバー時
+    star.addEventListener('mouseover', function() {
+      const value = parseInt(this.getAttribute('data-value'));
+      highlightStars(value);
+    });
+    
+    // マウスアウト時
+    star.addEventListener('mouseout', function() {
+      highlightStars(selectedRating);
+    });
+    
+    // クリック時
+    star.addEventListener('click', function() {
+      const value = parseInt(this.getAttribute('data-value'));
+      selectRating(value);
+      
+      // アニメーション効果
+      this.classList.add('pulse');
+      setTimeout(() => {
+        this.classList.remove('pulse');
+      }, 300);
+    });
+  });
+  
+  // スターコンテナからのマウスアウト時
+  const starsContainer = document.getElementById('starsContainer');
+  if (starsContainer) {
+    starsContainer.addEventListener('mouseout', function() {
+      highlightStars(selectedRating);
+    });
+  }
+  
+  // 星をハイライト表示
+  function highlightStars(count) {
+    stars.forEach(star => {
+      const starValue = parseInt(star.getAttribute('data-value'));
+      if (starValue <= count) {
+        star.classList.add('active');
+      } else {
+        star.classList.remove('active');
+      }
+    });
+  }
+  
+  // 評価を選択
+  function selectRating(value) {
+    selectedRating = value;
+    highlightStars(value);
+    
+    // 隠しラジオボタンを設定
+    const radioBtn = document.getElementById('star' + value);
+    if (radioBtn) radioBtn.checked = true;
+    
+    // UI更新
+    if (scoreValue) scoreValue.textContent = value;
+    if (ratingScore) ratingScore.classList.add('visible');
+    if (question2) question2.classList.add('completed');
+    
+    // エラー状態の解除
+    if (question2) question2.classList.remove('error');
+    const ratingValidation = document.getElementById('rating-validation');
+    if (ratingValidation) ratingValidation.classList.remove('visible');
+    const globalValidation = document.getElementById('global-validation');
+    if (globalValidation) globalValidation.classList.remove('visible');
+  }
+}
+
+// 動的サービスメニュー
+function initDynamicServices() {
+  const storeRadios = document.querySelectorAll('input[name="store"]');
+  const standardServices = document.getElementById('standard-services');
+  const ilServices = document.getElementById('il-services');
+  
+  if (!standardServices || !ilServices) return;
+  
+  storeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'iL') {
+        standardServices.style.display = 'none';
+        ilServices.style.display = 'block';
+        uncheckAll(standardServices);
+      } else {
+        standardServices.style.display = 'block';
+        ilServices.style.display = 'none';
+        uncheckAll(ilServices);
+      }
+    });
+  });
+  
+  function uncheckAll(container) {
+    if (!container) return;
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+  }
+}
+
+// フォームバリデーション
+function initFormValidation() {
+  const submitButton = document.querySelector('.submit-button');
+  if (submitButton) {
+    submitButton.addEventListener('click', validateAndSubmit);
+  }
+  
+  // 各質問のバリデーション状態を更新する関数
+  const questions = document.querySelectorAll('.question');
+  questions.forEach(question => {
+    const inputs = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+    inputs.forEach(input => {
+      input.addEventListener('change', function() {
+        markCompleted(question);
+      });
+    });
+    
+    const textareas = question.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+      textarea.addEventListener('input', function() {
+        if (this.value.trim().length > 0) {
+          markCompleted(question);
+        } else {
+          question.classList.remove('completed');
+        }
+      });
+    });
+  });
+}
+
+// 完了状態にマーク
+function markCompleted(question) {
+  question.classList.add('completed');
+  question.classList.remove('error');
+  
+  const validationMsg = question.querySelector('.validation-message');
+  if (validationMsg) {
+    validationMsg.classList.remove('visible');
+  }
+  
+  const globalValidation = document.getElementById('global-validation');
+  if (globalValidation) {
+    globalValidation.classList.remove('visible');
+  }
+}
+
+// フォームのバリデーションと送信
+function validateAndSubmit(e) {
+  if (e) e.preventDefault();
+  
+  const form = document.getElementById('surveyForm');
+  if (!form) return false;
+  
+  // FormDataオブジェクトの作成
+  const formData = new FormData(form);
+  
+  // バリデーション状態をリセット
+  resetValidationState();
+  
+  // 必須項目のチェック
+  const storeSelected = document.querySelector('input[name="store"]:checked');
+  const ratingSelected = document.querySelector('input[name="rating"]:checked');
+  
+  let hasErrors = false;
+  
+  // 店舗選択のバリデーション
+  if (!storeSelected) {
+    markError('question1', 'store-validation');
+    hasErrors = true;
+  }
+  
+  // 評価選択のバリデーション
+  if (!ratingSelected) {
+    markError('question2', 'rating-validation');
+    hasErrors = true;
+  }
+  
+  // エラーがある場合
+  if (hasErrors) {
+    showGlobalError();
+    scrollToFirstError();
+    return false;
+  }
+  
+  // 送信データの準備
+  const dataObj = formDataToObject(formData);
+  
+  // 評価と店舗の情報を取得
+  const rating = parseInt(dataObj.rating);
+  const selectedStore = dataObj.store || 'QUARTER';
+  
+  // 口コミ用コメント設定
+  prepareReviewComment(dataObj);
+  
+  // フォーム非表示
+  hideFormElements();
+  
+  // 結果表示
+  showResult(rating);
+  
+  // データ送信
+  submitFormData(dataObj);
+  
+  return true;
+}
+
+// バリデーション状態をリセット
+function resetValidationState() {
+  document.querySelectorAll('.validation-message').forEach(msg => {
+    msg.classList.remove('visible');
+  });
+  
+  document.querySelectorAll('.question.error').forEach(q => {
+    q.classList.remove('error');
+  });
+}
+
+// エラー表示を設定
+function markError(questionId, validationId) {
+  const question = document.getElementById(questionId);
+  const validation = document.getElementById(validationId);
+  
+  if (question) question.classList.add('error');
+  if (validation) validation.classList.add('visible');
+}
+
+// グローバルエラーメッセージを表示
+function showGlobalError() {
+  const globalValidation = document.getElementById('global-validation');
+  if (globalValidation) {
+    globalValidation.classList.add('visible');
+  }
+}
+
+// 最初のエラー要素までスクロール
+function scrollToFirstError() {
+  const firstError = document.querySelector('.question.error');
+  if (!firstError) return;
+  
+  firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  firstError.classList.add('highlight');
+  
+  setTimeout(() => {
+    firstError.classList.remove('highlight');
+  }, 1500);
+}
+
+// FormDataオブジェクトを通常のオブジェクトに変換
+function formDataToObject(formData) {
+  const dataObj = {};
+  
+  formData.forEach((val, key) => {
+    if (dataObj[key]) {
+      if (!Array.isArray(dataObj[key])) {
+        dataObj[key] = [dataObj[key]];
+      }
+      dataObj[key].push(val);
+    } else {
+      dataObj[key] = val;
+    }
+  });
+  
+  return dataObj;
+}
+
+// 口コミ用コメントを準備
+function prepareReviewComment(dataObj) {
+  let userComments = '';
+  
+  if (dataObj.improvement) userComments += dataObj.improvement + ' ';
+  if (dataObj.otherComments) userComments += dataObj.otherComments;
+  
+  const commentElement = document.getElementById('comment-to-copy');
+  if (commentElement) {
+    commentElement.value = userComments.trim();
+  }
+}
+
+// フォーム要素を非表示
+function hideFormElements() {
+  const form = document.getElementById('surveyForm');
+  const navContainer = document.querySelector('.nav-container');
+  
+  if (form) form.style.display = 'none';
+  if (navContainer) navContainer.style.display = 'none';
+}
+
+// 評価に応じた結果画面を表示
+function showResult(rating) {
+  if (rating >= 4) {
+    const headingElement = document.querySelector('#review-redirect h2');
+    if (headingElement) {
+      headingElement.textContent = rating === 5 ? 
+        '高評価ありがとうございます！' : 
+        '高評価ありがとうございます！';
+    }
+    
+    const reviewRedirect = document.getElementById('review-redirect');
+    if (reviewRedirect) {
+      reviewRedirect.classList.remove('hidden');
+    }
+  } else {
+    const thankyou = document.getElementById('thankyou');
+    if (thankyou) {
+      thankyou.classList.remove('hidden');
+    }
+  }
+}
+
+// フォームデータをサーバーに送信
+function submitFormData(dataObj) {
+  try {
+    const apiUrl = CONFIG.APPS_SCRIPT_WEBAPP_URL;
+    if (!apiUrl) return;
+    
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams(dataObj)
+    })
+    .then(res => res.json())
+    .then(result => {
+      console.log('送信成功:', result);
+      if (!result.success) {
+        alert('エラーが発生しました: ' + result.error);
+      }
+    })
+    .catch(err => {
+      console.error('送信エラー:', err);
+    });
+  } catch (e) {
+    console.error('データ送信エラー:', e);
+  }
+}
+
+// コメントをクリップボードにコピー
+document.addEventListener('DOMContentLoaded', function() {
+  const copyButton = document.getElementById('copy-button');
+  if (copyButton) {
+    copyButton.addEventListener('click', function() {
+      const commentElement = document.getElementById('comment-to-copy');
+      if (!commentElement) return;
+      
+      commentElement.select();
+      try {
+        document.execCommand('copy');
+        this.textContent = 'コピーしました！';
+        setTimeout(() => {
+          this.textContent = 'コメントをコピー';
+        }, 2000);
+      } catch (e) {
+        console.error('コピーエラー:', e);
+      }
+    });
+  }
+  
+  // Googleマップへリダイレクト
+  const redirectButton = document.getElementById('redirect-button');
+  if (redirectButton) {
+    redirectButton.addEventListener('click', function() {
+      const selectedStore = document.querySelector('input[name="store"]:checked');
+      const storeName = selectedStore ? selectedStore.value : 'QUARTER';
+      
+      if (CONFIG.STORE_REVIEW_URLS) {
+        const url = CONFIG.STORE_REVIEW_URLS[storeName] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
+        window.open(url, '_blank');
+      }
+    });
+  }
+});
+  <script>
+    /* JavaScriptコードをここに記述 */
   </script>
 </body>
 </html>
