@@ -1,0 +1,326 @@
+/**
+ * QUARTERアンケート - 初期化スクリプト
+ * このスクリプトは各モジュールが正しく読み込まれ、初期化されることを保証します
+ */
+
+// 初期化処理の実行順序を制御する即時実行関数
+(function() {
+  // DOM読み込み状態の確認とイベントリスナーの設定
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAllModules);
+  } else {
+    // DOM読み込み済みの場合は直接初期化を開始
+    initializeAllModules();
+  }
+
+  /**
+   * すべてのモジュールを初期化する関数
+   * 各機能モジュールの初期化関数を順番に呼び出します
+   */
+  function initializeAllModules() {
+    console.log('QUARTERアンケート：すべてのモジュールの初期化を開始します');
+    
+    // CONFIG設定の確認とフォールバック
+    ensureConfig();
+    
+    // 各モジュールを順番に初期化
+    initNavigationModule();
+    initScrollMonitorModule();
+    initStarRatingModule();
+    initValidationModule();
+    initDynamicServicesModule();
+    
+    // 完了ログ
+    console.log('QUARTERアンケート：初期化完了');
+  }
+  
+  /**
+   * 設定オブジェクトが存在することを確認
+   * 存在しない場合はデフォルト値で作成
+   */
+  function ensureConfig() {
+    if (typeof window.CONFIG === 'undefined') {
+      console.warn('CONFIG変数が見つかりません。デフォルト設定を使用します。');
+      window.CONFIG = {
+        APPS_SCRIPT_WEBAPP_URL: 'https://script.google.com/macros/s/AKfycbxA-xuRc_F0Ih1KE9r9YXfOJ5WJqF0vUZvm3Eb_aQ9coqBjJzoA3nNoRuxNmajK06Xceg/exec',
+        STORE_REVIEW_URLS: {
+          'QUARTER': 'https://g.page/r/CfiWzYV0WLCdEBE/review',
+          'QUARTER RESORT': 'https://g.page/r/CUpu9_cAhdaGEBE/review',
+          'QUARTER SEASONS': 'https://g.page/r/CWAu_dLl0DJmEBE/review',
+          'LINK': 'https://g.page/r/CYLblbqgWXsREBE/review',
+          'iL': 'https://g.page/r/CemPjkInZSpLEBE/review'
+        }
+      };
+    }
+  }
+  
+  /**
+   * ナビゲーションモジュールの初期化
+   */
+  function initNavigationModule() {
+    if (typeof window.initCrossPlatformNavigation === 'function') {
+      console.log('ナビゲーションモジュールを初期化します');
+      try {
+        window.initCrossPlatformNavigation();
+      } catch (e) {
+        console.error('ナビゲーション初期化エラー:', e);
+      }
+    } else {
+      console.warn('ナビゲーション初期化関数が見つかりません');
+    }
+  }
+  
+  /**
+   * スクロールモニターモジュールの初期化
+   */
+  function initScrollMonitorModule() {
+    if (typeof window.initScrollMonitor === 'function') {
+      console.log('スクロールモニターを初期化します');
+      try {
+        window.initScrollMonitor();
+      } catch (e) {
+        console.error('スクロールモニター初期化エラー:', e);
+      }
+    } else {
+      console.warn('スクロールモニター初期化関数が見つかりません');
+      // スクロールモニター関数が見つからない場合の簡易実装
+      setupSimpleScrollMonitor();
+    }
+  }
+  
+  /**
+   * 星評価モジュールの初期化
+   */
+  function initStarRatingModule() {
+    if (typeof window.initStarRating === 'function') {
+      console.log('星評価モジュールを初期化します');
+      try {
+        window.initStarRating();
+      } catch (e) {
+        console.error('星評価初期化エラー:', e);
+      }
+    } else {
+      console.warn('星評価初期化関数が見つかりません');
+      // 星評価関数が見つからない場合の簡易実装
+      setupSimpleStarRating();
+    }
+  }
+  
+  /**
+   * バリデーションモジュールの初期化
+   */
+  function initValidationModule() {
+    if (typeof window.initFormValidation === 'function') {
+      console.log('フォームバリデーションを初期化します');
+      try {
+        window.initFormValidation();
+      } catch (e) {
+        console.error('フォームバリデーション初期化エラー:', e);
+      }
+    } else {
+      console.warn('フォームバリデーション初期化関数が見つかりません');
+    }
+  }
+  
+  /**
+   * 動的サービスメニューモジュールの初期化
+   */
+  function initDynamicServicesModule() {
+    if (typeof window.initDynamicServices === 'function') {
+      console.log('動的サービスメニューを初期化します');
+      try {
+        window.initDynamicServices();
+      } catch (e) {
+        console.error('動的サービスメニュー初期化エラー:', e);
+      }
+    } else {
+      console.warn('動的サービスメニュー初期化関数が見つかりません');
+      // 動的サービス関数が見つからない場合の簡易実装
+      setupSimpleDynamicServices();
+    }
+  }
+  
+  /**
+   * 簡易スクロールモニターのセットアップ
+   * 本来のスクロールモニター機能が利用できない場合のフォールバック
+   */
+  function setupSimpleScrollMonitor() {
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('.question[data-section]');
+    
+    if (navItems.length === 0 || sections.length === 0) return;
+    
+    window.addEventListener('scroll', function() {
+      const scrollPosition = window.scrollY;
+      
+      let currentSection = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        
+        if (scrollPosition >= sectionTop - 100 && 
+            scrollPosition < sectionTop + sectionHeight - 100) {
+          currentSection = section.getAttribute('data-section');
+        }
+      });
+      
+      if (currentSection) {
+        navItems.forEach(item => {
+          item.classList.remove('active');
+          if (item.getAttribute('data-section') === currentSection) {
+            item.classList.add('active');
+          }
+        });
+      }
+    });
+  }
+  
+  /**
+   * 簡易星評価のセットアップ
+   * 本来の星評価機能が利用できない場合のフォールバック
+   */
+  function setupSimpleStarRating() {
+    const stars = document.querySelectorAll('.star');
+    const ratingScore = document.getElementById('ratingScore');
+    const scoreValue = document.getElementById('scoreValue');
+    
+    if (stars.length === 0) return;
+    
+    let selectedRating = 0;
+    
+    stars.forEach(star => {
+      star.addEventListener('mouseover', function() {
+        const value = parseInt(this.getAttribute('data-value'));
+        highlightStars(value);
+      });
+      
+      star.addEventListener('mouseout', function() {
+        highlightStars(selectedRating);
+      });
+      
+      star.addEventListener('click', function() {
+        const value = parseInt(this.getAttribute('data-value'));
+        selectedRating = value;
+        highlightStars(value);
+        
+        if (scoreValue) scoreValue.textContent = value;
+        if (ratingScore) ratingScore.classList.add('visible');
+        
+        const radioBtn = document.getElementById('star' + value);
+        if (radioBtn) radioBtn.checked = true;
+        
+        const question2 = document.getElementById('question2');
+        if (question2) question2.classList.add('completed');
+      });
+    });
+    
+    function highlightStars(count) {
+      stars.forEach(star => {
+        const starValue = parseInt(star.getAttribute('data-value'));
+        if (starValue <= count) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+  }
+  
+  /**
+   * 簡易動的サービスメニューのセットアップ
+   * 本来の動的サービス機能が利用できない場合のフォールバック
+   */
+  function setupSimpleDynamicServices() {
+    const storeRadios = document.querySelectorAll('input[name="store"]');
+    const standardServices = document.getElementById('standard-services');
+    const ilServices = document.getElementById('il-services');
+    
+    if (storeRadios.length === 0 || !standardServices || !ilServices) return;
+    
+    storeRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'iL') {
+          standardServices.style.display = 'none';
+          ilServices.style.display = 'block';
+          uncheckAllServices(standardServices);
+        } else {
+          standardServices.style.display = 'block';
+          ilServices.style.display = 'none';
+          uncheckAllServices(ilServices);
+        }
+      });
+    });
+    
+    // 初期状態の確認
+    const selectedStore = document.querySelector('input[name="store"]:checked');
+    if (selectedStore && selectedStore.value === 'iL') {
+      standardServices.style.display = 'none';
+      ilServices.style.display = 'block';
+    }
+    
+    function uncheckAllServices(container) {
+      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
+    }
+  }
+  
+  /**
+   * 送信ボタン処理のセットアップ
+   * 各イベントハンドラを登録します
+   */
+  function setupSubmitButtons() {
+    // 送信ボタン
+    const submitButton = document.getElementById('submitButton');
+    if (submitButton) {
+      submitButton.addEventListener('click', function() {
+        if (typeof window.validateAndSubmit === 'function') {
+          window.validateAndSubmit();
+        } else {
+          alert('送信処理が初期化されていません。ページを再読み込みしてください。');
+        }
+      });
+    }
+    
+    // コピーボタン
+    const copyButton = document.getElementById('copy-button');
+    if (copyButton) {
+      copyButton.addEventListener('click', function() {
+        const commentElement = document.getElementById('comment-to-copy');
+        if (!commentElement) return;
+        
+        commentElement.select();
+        try {
+          document.execCommand('copy');
+          this.textContent = 'コピーしました！';
+          setTimeout(() => {
+            this.textContent = 'コメントをコピー';
+          }, 2000);
+        } catch (e) {
+          console.error('コピーエラー:', e);
+          this.textContent = 'コピーできませんでした';
+          setTimeout(() => {
+            this.textContent = 'コメントをコピー';
+          }, 2000);
+        }
+      });
+    }
+    
+    // Googleマップリダイレクトボタン
+    const redirectButton = document.getElementById('redirect-button');
+    if (redirectButton) {
+      redirectButton.addEventListener('click', function() {
+        const selectedStore = document.querySelector('input[name="store"]:checked');
+        const storeName = selectedStore ? selectedStore.value : 'QUARTER';
+        
+        if (typeof CONFIG !== 'undefined' && CONFIG.STORE_REVIEW_URLS) {
+          const url = CONFIG.STORE_REVIEW_URLS[storeName] || CONFIG.STORE_REVIEW_URLS['QUARTER'];
+          window.open(url, '_blank');
+        } else {
+          console.error('STORE_REVIEW_URLS が定義されていません');
+        }
+      });
+    }
+  }
+})(); // 即時実行関数の終了
