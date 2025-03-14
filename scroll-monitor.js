@@ -13,8 +13,6 @@
  
  // スクロール位置監視機能の初期化
  function initScrollMonitor() {
-   console.log('スクロール位置監視機能の初期化');
-   
    // 監視対象のセクションを特定
    const sections = {
      store: document.querySelectorAll('[data-section="store"]'),
@@ -73,8 +71,6 @@
        }
      }
      
-     console.log('現在のセクション:', mostVisibleSection, '(可視性:', maxVisibility.toFixed(2), ')');
-     
      // ナビゲーション項目の更新
      if (mostVisibleSection) {
        const navItems = document.querySelectorAll('.nav-item');
@@ -82,9 +78,6 @@
        navItems.forEach(item => {
          const itemSection = item.getAttribute('data-section');
          if (itemSection === mostVisibleSection) {
-           if (!item.classList.contains('active')) {
-             console.log('ナビアイテム切り替え:', itemSection);
-           }
            item.classList.add('active');
          } else {
            item.classList.remove('active');
