@@ -59,39 +59,16 @@ function setupFormSubmission() {
   }
 }
 
-// アンケート送信後の処理
+// アンケート送信後の処理（validation.jsからのコールバック用）
 window.handleFormAfterSubmission = function(rating) {
   try {
-    const surveyForm = document.getElementById('surveyForm');
+    // submitContainerをもう一度非表示にする
     const submitContainer = document.querySelector('.submit-container');
-    const thankYouMessage = document.getElementById('thankyou');
-    const reviewRedirect = document.getElementById('review-redirect');
-    
-    if (!surveyForm || !submitContainer || !thankYouMessage || !reviewRedirect) {
-      console.error('必要なDOM要素が見つかりません');
-      return;
+    if (submitContainer) {
+      submitContainer.classList.add('hidden');
     }
     
-    surveyForm.classList.add('hidden');
-    submitContainer.classList.add('hidden');
-    
-    if (rating >= 4) {
-      // 高評価（星4または5）の場合
-      reviewRedirect.classList.remove('hidden');
-      
-      const titleElement = reviewRedirect.querySelector('h2');
-      if (titleElement) {
-        titleElement.textContent = `星${rating}ありがとうございます！`;
-      }
-      
-      if (typeof prepareReviewComment === 'function') {
-        prepareReviewComment();
-      }
-    } else {
-      // 低評価（星3以下）の場合
-      thankYouMessage.classList.remove('hidden');
-    }
-    
+    // ページトップにスクロール
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -111,6 +88,7 @@ window.copyComment = function() {
   commentElement.select();
   
   try {
+    // モダンAPIを試す
     if (navigator.clipboard) {
       navigator.clipboard.writeText(commentElement.value)
         .then(function() {
@@ -132,11 +110,19 @@ window.copyComment = function() {
 // 古いブラウザ用のコピー機能フォールバック
 function fallbackCopy() {
   try {
-    document.execCommand('copy');
-    updateCopyButtonState(true);
+    // document.execCommandが使用可能かチェック
+    if (document.queryCommandSupported && document.queryCommandSupported('copy')) {
+      document.execCommand('copy');
+      updateCopyButtonState(true);
+    } else {
+      // 両方の方法が失敗した場合
+      alert('ブラウザがコピー機能をサポートしていません。テキストを手動でコピーしてください。');
+      updateCopyButtonState(false);
+    }
   } catch (fallbackErr) {
     alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
     console.error('フォールバックコピーエラー:', fallbackErr);
+    updateCopyButtonState(false);
   }
 }
 
